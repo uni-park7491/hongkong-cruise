@@ -382,6 +382,19 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
 .p-bar-disagree{height:8px;background:#d63b3b;border-radius:6px;transition:width .4s}
 
 
+
+/* ── 항공사별 표시 제어 ── */
+body.user-asiana .premia-only { display: none !important; }
+body.user-premia .asiana-only { display: none !important; }
+
+/* ── 팝업 섹션 메인에서 숨김 ── */
+.popup-section { display: none; }
+
+/* ── 관리자 전용 숨김 ── */
+.admin-only { display: none !important; }
+body.is-admin .admin-only { display: block !important; }
+body.is-admin .qn-btn.admin-only { display: flex !important; }
+
 /* ── 개인 로그인 ── */
 #loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--navy);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;box-sizing:border-box}
 #loginScreen.hidden{display:none}
@@ -489,15 +502,15 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   <!-- 빠른 메뉴 -->
   <div class="quick-nav">
     <div class="qn-btn" onclick="scrollTo2('schedule')"><span class="ico">📅</span>일정</div>
-    <div class="qn-btn" onclick="scrollTo2('flights')"><span class="ico">✈️</span>항공편</div>
-    <div class="qn-btn" onclick="scrollTo2('passengers')"><span class="ico">👥</span>탑승객</div>
-    <div class="qn-btn" onclick="scrollTo2('final')"><span class="ico">📋</span>최종정리</div>
+    <div class="qn-btn" onclick="openPopupSection('flights')"><span class="ico">✈️</span>항공편</div>
+    <div class="qn-btn admin-only" onclick="openPopupSection('passengers')"><span class="ico">👥</span>탑승객</div>
+    <div class="qn-btn admin-only" onclick="openPopupSection('final')"><span class="ico">📋</span>최종정리</div>
     <div class="qn-btn" onclick="openEmergency()"><span class="ico">🚨</span>비상연락망</div>
     <div class="qn-btn" onclick="scrollTo2('attractions')"><span class="ico">🏙️</span>관광지 TOP10</div>
-    <div class="qn-btn" onclick="scrollTo2('food')"><span class="ico">🍜</span>홍콩 맛집</div>
-    <div class="qn-btn" onclick="scrollTo2('exchange')"><span class="ico">💱</span>환율계산기</div>
-    <div class="qn-btn" onclick="scrollTo2('tips')"><span class="ico">💡</span>여행 팁</div>
-    <div class="qn-btn" onclick="scrollTo2('checklist')"><span class="ico">✅</span>준비물</div>
+    <div class="qn-btn" onclick="openPopupSection('food')"><span class="ico">🍜</span>홍콩 맛집</div>
+    <div class="qn-btn" onclick="openPopupSection('exchange')"><span class="ico">💱</span>환율계산기</div>
+    <div class="qn-btn" onclick="openPopupSection('tips')"><span class="ico">💡</span>여행 팁</div>
+    <div class="qn-btn" onclick="openPopupSection('checklist')"><span class="ico">✅</span>준비물</div>
     <div class="qn-btn" onclick="scrollTo2('community')"><span class="ico">💬</span>게시판</div>
     <div class="qn-btn" onclick="openAdminLogin()" id="adminNavBtn"><span class="ico">🔒</span>관리자</div>
   </div>
@@ -553,10 +566,10 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   </div>
 
   <!-- 항공편 -->
-  <div class="section" id="flights">
+  <div class="section popup-section" id="flights">
     <div class="sec-title"><span class="ico">✈️</span><h2>항공편 정보</h2></div>
     <div class="flight-grid">
-      <div class="flight-card" onclick="openMapModal('asiana')">
+      <div class="flight-card asiana-only" onclick="openMapModal('asiana')">
         <div class="fc-airline">아시아나항공 · OZ 721</div>
         <div class="fc-route">서울 → 홍콩</div>
         <div class="fc-row"><span class="k">출발</span><span class="v">2026.04.24 09:00</span></div>
@@ -566,7 +579,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
         <div class="fc-row"><span class="k">탑승 인원</span><span class="v">16명</span></div>
         <div class="fc-map-hint">🗺 터미널 약도 보기 →</div>
       </div>
-      <div class="flight-card" onclick="openMapModal('premia')">
+      <div class="flight-card premia-only" onclick="openMapModal('premia')">
         <div class="fc-airline">에어프레미아 · YP 801</div>
         <div class="fc-route">서울 → 홍콩</div>
         <div class="fc-row"><span class="k">출발</span><span class="v">2026.04.24 09:15</span></div>
@@ -596,7 +609,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   </div>
 
   <!-- 탑승객 -->
-  <div class="section" id="passengers">
+  <div class="section admin-only" id="passengers">
     <div class="sec-title"><span class="ico">👥</span><h2>탑승객 명단</h2></div>
     <div class="stat-row">
       <div class="stat"><div class="sl">전체 인원</div><div class="sv">22</div></div>
@@ -675,7 +688,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   </div>
 
   <!-- 최종 정리 -->
-  <div class="section" id="final">
+  <div class="section admin-only" id="final">
     <div class="sec-title"><span class="ico">📋</span><h2>최종 탑승 정보 전원</h2></div>
     <div class="sort-bar">
       <span>정렬:</span>
@@ -734,7 +747,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   </div>
 
   <!-- 홍콩 맛집 -->
-  <div class="section" id="food">
+  <div class="section popup-section" id="food">
     <div class="sec-title"><span class="ico">🍜</span><h2>홍콩 공항 &amp; 시내 맛집</h2></div>
     <p style="font-size:14px;color:#64748b;margin-bottom:16px">홍콩은 세계 최고 공항 다이닝으로 유명합니다. 공항 안팎으로 즐길 수 있는 맛집을 정리했어요.</p>
     <div style="font-size:13px;font-weight:700;color:#1e5fd4;margin-bottom:10px">🛫 홍콩 국제공항 내 (T1 출발층)</div>
@@ -761,7 +774,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
 
 
   <!-- 여행 팁 + 주의사항 -->
-  <div class="section" id="tips">
+  <div class="section popup-section" id="tips">
     <div class="sec-title"><span class="ico">💡</span><h2>홍콩 여행 팁 &amp; 주의사항</h2></div>
     <div class="info-grid">
       <div class="info-card">
@@ -813,7 +826,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
 
 
   <!-- 환율 계산기 -->
-  <div class="section" id="exchange">
+  <div class="section popup-section" id="exchange">
     <div class="sec-title"><span class="ico">💱</span><h2>홍콩달러 환율 계산기</h2></div>
     <p style="font-size:13px;color:#94a3b8;margin-bottom:16px">※ 참고용 대략값입니다 · 실제 환율과 다를 수 있어요 (기준: HKD 1 ≈ 190원)</p>
     <div class="calc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -942,7 +955,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   </div>
 
   <!-- 준비물 체크리스트 -->
-  <div class="section" id="checklist">
+  <div class="section popup-section" id="checklist">
     <div class="sec-title"><span class="ico">✅</span><h2>출발 전 준비물 체크리스트</h2></div>
     <p style="font-size:14px;color:#64748b;margin-bottom:16px">체크박스를 눌러 완료 표시하세요!</p>
     <div class="info-grid">
@@ -999,6 +1012,15 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   <div class="modal" style="max-width:480px">
     <button class="modal-close" onclick="closeAll()">✕</button>
     <div id="pollModalContent" style="padding:28px"></div>
+  </div>
+</div>
+
+
+<!-- ══ 팝업 섹션 모달 ══ -->
+<div class="overlay" id="popupSectionOverlay" onclick="closePopupSection(event)" style="align-items:flex-start;padding-top:30px">
+  <div class="modal" style="max-width:960px;max-height:90vh;overflow-y:auto;padding:0">
+    <button class="modal-close" onclick="closeAll()" style="position:sticky;top:10px;float:right;margin:10px 10px 0 0;z-index:10">✕</button>
+    <div id="popupSectionContent" style="padding:24px"></div>
   </div>
 </div>
 
@@ -1112,28 +1134,28 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
     <button class="modal-close" onclick="closeAll()">✕</button>
     <div style="padding:24px 24px 0"><h2 style="font-family:Barlow,sans-serif;font-size:1.3rem;font-weight:700;color:#d63b3b">🚨 비상연락망</h2><p style="font-size:14px;color:#64748b;margin-top:4px;margin-bottom:0">비상 시 아래 연락처를 이용해 주세요</p></div>
     <div class="emg-grid">
-      <div class="emg-card"><div class="role">인솔</div><div class="name">박수영</div><div class="nick">닉네임: 유니</div><div class="phone">010-4999-4116</div></div>
-      <div class="emg-card"><div class="role" style="visibility:hidden">인솔</div><div class="name">박정이</div><div class="nick">닉네임: 맥가이버</div><div class="phone">010-5342-0356</div></div>
-      <div class="emg-card"><div class="name">우진희</div><div class="nick">닉네임: 루시</div><div class="phone">010-7387-6114</div></div>
-      <div class="emg-card"><div class="name">안정원</div><div class="nick">닉네임: 스텔라</div><div class="phone">010-3662-3459</div></div>
-      <div class="emg-card"><div class="name">최경환</div><div class="nick">닉네임: 초이스</div><div class="phone">010-3828-0303</div></div>
-      <div class="emg-card"><div class="name">박승범</div><div class="nick">닉네임: 세일러</div><div class="phone">010-7378-2225</div></div>
-      <div class="emg-card"><div class="name">서정희</div><div class="nick">닉네임: 크리스탈</div><div class="phone">010-2476-2378</div></div>
-      <div class="emg-card"><div class="name">김재담</div><div class="nick">닉네임: 썬킴</div><div class="phone">010-8253-2411</div></div>
-      <div class="emg-card"><div class="name">김도은</div><div class="nick">도은</div><div class="phone">010-9969-7457</div></div>
-      <div class="emg-card"><div class="name">우종선</div><div class="nick">닉네임: JS우</div><div class="phone">010-6323-0952</div></div>
-      <div class="emg-card"><div class="name">현승희</div><div class="nick">승희</div><div class="phone">010-2201-0231</div></div>
-      <div class="emg-card"><div class="name">황중일</div><div class="nick">중일</div><div class="phone">010-5758-8192</div></div>
-      <div class="emg-card"><div class="name">정금자</div><div class="nick">금자</div><div class="phone">010-5387-8192</div></div>
-      <div class="emg-card"><div class="name">김채은</div><div class="nick">채은</div><div class="phone">010-3606-1523</div></div>
-      <div class="emg-card"><div class="name">김무성</div><div class="nick">무성</div><div class="phone">010-2086-5435</div></div>
-      <div class="emg-card"><div class="name">최운화</div><div class="nick">운화</div><div class="phone">010-3615-9428</div></div>
-      <div class="emg-card"><div class="name">김인자</div><div class="nick">인자</div><div class="phone">010-4723-1982</div></div>
-      <div class="emg-card"><div class="name">김명순</div><div class="nick">명순</div><div class="phone">010-2940-3558</div></div>
-      <div class="emg-card"><div class="name">주재순</div><div class="nick">재순</div><div class="phone">010-4166-2747</div></div>
-      <div class="emg-card"><div class="name">박평심</div><div class="nick">평심</div><div class="phone">010-4931-1866</div></div>
-      <div class="emg-card"><div class="name">김수영</div><div class="nick">수영</div><div class="phone">010-3622-9644</div></div>
-      <div class="emg-card"><div class="name">김경애</div><div class="nick">경애</div><div class="phone">010-5092-1407</div></div>
+      <div class="emg-card"><div class="role">인솔</div><div class="name">박수영</div><div class="nick">닉네임: 유니</div><div class="phone"><a href="tel:01049994116" onclick="return confirmCall('010-4999-4116')" style="color:var(--teal);text-decoration:none;font-weight:700">010-4999-4116 📞</a></div></div>
+      <div class="emg-card"><div class="role" style="visibility:hidden">인솔</div><div class="name">박정이</div><div class="nick">닉네임: 맥가이버</div><div class="phone"><a href="tel:01053420356" onclick="return confirmCall('010-5342-0356')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5342-0356 📞</a></div></div>
+      <div class="emg-card"><div class="name">우진희</div><div class="nick">닉네임: 루시</div><div class="phone"><a href="tel:01073876114" onclick="return confirmCall('010-7387-6114')" style="color:var(--teal);text-decoration:none;font-weight:700">010-7387-6114 📞</a></div></div>
+      <div class="emg-card"><div class="name">안정원</div><div class="nick">닉네임: 스텔라</div><div class="phone"><a href="tel:01036623459" onclick="return confirmCall('010-3662-3459')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3662-3459 📞</a></div></div>
+      <div class="emg-card"><div class="name">최경환</div><div class="nick">닉네임: 초이스</div><div class="phone"><a href="tel:01038280303" onclick="return confirmCall('010-3828-0303')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3828-0303 📞</a></div></div>
+      <div class="emg-card"><div class="name">박승범</div><div class="nick">닉네임: 세일러</div><div class="phone"><a href="tel:01073782225" onclick="return confirmCall('010-7378-2225')" style="color:var(--teal);text-decoration:none;font-weight:700">010-7378-2225 📞</a></div></div>
+      <div class="emg-card"><div class="name">서정희</div><div class="nick">닉네임: 크리스탈</div><div class="phone"><a href="tel:01024762378" onclick="return confirmCall('010-2476-2378')" style="color:var(--teal);text-decoration:none;font-weight:700">010-2476-2378 📞</a></div></div>
+      <div class="emg-card"><div class="name">김재담</div><div class="nick">닉네임: 썬킴</div><div class="phone"><a href="tel:01082532411" onclick="return confirmCall('010-8253-2411')" style="color:var(--teal);text-decoration:none;font-weight:700">010-8253-2411 📞</a></div></div>
+      <div class="emg-card"><div class="name">김도은</div><div class="nick">도은</div><div class="phone"><a href="tel:01099697457" onclick="return confirmCall('010-9969-7457')" style="color:var(--teal);text-decoration:none;font-weight:700">010-9969-7457 📞</a></div></div>
+      <div class="emg-card"><div class="name">우종선</div><div class="nick">닉네임: JS우</div><div class="phone"><a href="tel:01063230952" onclick="return confirmCall('010-6323-0952')" style="color:var(--teal);text-decoration:none;font-weight:700">010-6323-0952 📞</a></div></div>
+      <div class="emg-card"><div class="name">현승희</div><div class="nick">승희</div><div class="phone"><a href="tel:01022010231" onclick="return confirmCall('010-2201-0231')" style="color:var(--teal);text-decoration:none;font-weight:700">010-2201-0231 📞</a></div></div>
+      <div class="emg-card"><div class="name">황중일</div><div class="nick">중일</div><div class="phone"><a href="tel:01057588192" onclick="return confirmCall('010-5758-8192')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5758-8192 📞</a></div></div>
+      <div class="emg-card"><div class="name">정금자</div><div class="nick">금자</div><div class="phone"><a href="tel:01053878192" onclick="return confirmCall('010-5387-8192')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5387-8192 📞</a></div></div>
+      <div class="emg-card"><div class="name">김채은</div><div class="nick">채은</div><div class="phone"><a href="tel:01036061523" onclick="return confirmCall('010-3606-1523')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3606-1523 📞</a></div></div>
+      <div class="emg-card"><div class="name">김무성</div><div class="nick">무성</div><div class="phone"><a href="tel:01020865435" onclick="return confirmCall('010-2086-5435')" style="color:var(--teal);text-decoration:none;font-weight:700">010-2086-5435 📞</a></div></div>
+      <div class="emg-card"><div class="name">최운화</div><div class="nick">운화</div><div class="phone"><a href="tel:01036159428" onclick="return confirmCall('010-3615-9428')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3615-9428 📞</a></div></div>
+      <div class="emg-card"><div class="name">김인자</div><div class="nick">인자</div><div class="phone"><a href="tel:01047231982" onclick="return confirmCall('010-4723-1982')" style="color:var(--teal);text-decoration:none;font-weight:700">010-4723-1982 📞</a></div></div>
+      <div class="emg-card"><div class="name">김명순</div><div class="nick">명순</div><div class="phone"><a href="tel:01029403558" onclick="return confirmCall('010-2940-3558')" style="color:var(--teal);text-decoration:none;font-weight:700">010-2940-3558 📞</a></div></div>
+      <div class="emg-card"><div class="name">주재순</div><div class="nick">재순</div><div class="phone"><a href="tel:01041662747" onclick="return confirmCall('010-4166-2747')" style="color:var(--teal);text-decoration:none;font-weight:700">010-4166-2747 📞</a></div></div>
+      <div class="emg-card"><div class="name">박평심</div><div class="nick">평심</div><div class="phone"><a href="tel:01049311866" onclick="return confirmCall('010-4931-1866')" style="color:var(--teal);text-decoration:none;font-weight:700">010-4931-1866 📞</a></div></div>
+      <div class="emg-card"><div class="name">김수영</div><div class="nick">수영</div><div class="phone"><a href="tel:01036229644" onclick="return confirmCall('010-3622-9644')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3622-9644 📞</a></div></div>
+      <div class="emg-card"><div class="name">김경애</div><div class="nick">경애</div><div class="phone"><a href="tel:01050921407" onclick="return confirmCall('010-5092-1407')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5092-1407 📞</a></div></div>
     </div>
     <div style="padding:0 24px 20px;font-size:13px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:14px;margin-top:4px">
       🏥 홍콩 긴급: <strong>999</strong> · 한국 영사관: <strong>+852-2529-4141</strong> · 관광경찰: <strong>+852-2527-7177</strong>
@@ -1201,6 +1223,7 @@ function doAdminLogin(){
     document.getElementById('myDashboard').style.display='none';
     document.querySelector('.hero').style.display='';
     document.querySelector('.wrap').style.display='';
+    document.body.classList.add('is-admin');
     closeAll();
     updateAdminBtn();
     openAdminPanel();
@@ -1228,8 +1251,16 @@ function openAdminPanel(){
 
 function logoutAdmin(){
   isAdminLoggedIn = false;
+  currentUser = null;
+  document.body.classList.remove('is-admin');
   updateAdminBtn();
   closeAll();
+  // 로그인 화면으로
+  document.getElementById('myDashboard').style.display='none';
+  document.querySelector('.hero').style.display='';
+  document.querySelector('.wrap').style.display='';
+  ['p1','p2','p3','p4'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('loginScreen').classList.remove('hidden');
 }
 
 function updateAdminBtn(){
@@ -1320,6 +1351,10 @@ function showFullSite(){
 
 function enterUserMode(pax){
   currentUser = pax;
+  // 항공사 클래스 적용
+  document.body.classList.remove('user-asiana','user-premia');
+  if(pax.flight1 === 'OZ721') document.body.classList.add('user-asiana');
+  else document.body.classList.add('user-premia');
   // 메인 사이트 숨기기
   document.querySelector('.hero').style.display='none';
   document.querySelector('.wrap').style.display='none';
@@ -1336,13 +1371,16 @@ function showMyDashboard(pax){
   document.getElementById('myWelcomeName').textContent = pax.name + ' 님';
   document.getElementById('myWelcomeNick').textContent = '닉네임: ' + pax.nick;
 
-  // 22명 명단 (이름+닉네임만)
-  const memberList = PAX_DATA.map((p,i)=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);${p.phone===pax.phone?'background:var(--blue-light);border-radius:8px;':''}">
-      <span style="font-size:12px;color:var(--gray);width:20px;text-align:center">${i+1}</span>
-      <span style="font-weight:700;color:var(--navy);font-size:14px">${p.name}</span>
+  // 22명 명단 - 본인 맨 위, 나머지는 아래
+  const me = PAX_DATA.find(p=>p.phone===pax.phone);
+  const others = PAX_DATA.filter(p=>p.phone!==pax.phone);
+  const sorted = [me, ...others];
+  const memberList = sorted.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);${i===0?'background:var(--blue-light);border-radius:8px;border:1.5px solid var(--blue);margin-bottom:6px;':''}">
+      <span style="font-size:12px;color:var(--gray);width:20px;text-align:center">${i===0?'⭐':i}</span>
+      <span style="font-weight:700;color:${i===0?'var(--blue)':'var(--navy)'};font-size:14px">${p.name}</span>
       <span style="font-size:12px;color:var(--gray);background:var(--bg);border-radius:4px;padding:2px 8px">${p.nick}</span>
-      ${p.phone===pax.phone?'<span style="font-size:11px;color:var(--blue);font-weight:700;margin-left:auto">나</span>':''}
+      ${i===0?'<span style="font-size:11px;color:var(--blue);font-weight:700;margin-left:auto">나</span>':''}
     </div>`).join('');
 
   document.getElementById('myFlightCards').innerHTML = `
@@ -1390,13 +1428,38 @@ function selectPax(phone){
 }
 
 function exitMyView(){
-  // 로그아웃 → 로그인 화면으로
   currentUser = null;
+  isAdminLoggedIn = false;
+  document.body.classList.remove('is-admin','user-asiana','user-premia');
   document.getElementById('myDashboard').style.display='none';
   document.querySelector('.hero').style.display='';
   document.querySelector('.wrap').style.display='';
   ['p1','p2','p3','p4'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('loginScreen').classList.remove('hidden');
+  updateAdminBtn();
+}
+
+
+
+// ─────────── 전화 연결 ───────────
+function confirmCall(number){
+  return confirm(`📞 ${number}\n\n통화를 연결하시겠습니까?`);
+}
+
+// ─────────── 섹션 팝업 ───────────
+function openPopupSection(id){
+  const sec = document.getElementById(id);
+  if(!sec) return;
+  const clone = sec.cloneNode(true);
+  // 기존 섹션 스타일 제거하고 패딩 조정
+  clone.style.boxShadow = 'none';
+  clone.style.borderRadius = '0';
+  document.getElementById('popupSectionContent').innerHTML = '';
+  document.getElementById('popupSectionContent').appendChild(clone);
+  document.getElementById('popupSectionOverlay').classList.add('show');
+}
+function closePopupSection(e){
+  if(e.target===document.getElementById('popupSectionOverlay')) closeAll();
 }
 
 // ─────────── 커뮤니티 (Firebase) ───────────
@@ -1726,7 +1789,7 @@ function renderAttractions(){
   if(!grid)return;
   grid.innerHTML=attractions.map(a=>`
     <div class="att-card" onclick="openPhoto(${a.rank})">
-      <div class="att-thumb-placeholder">${a.emoji}</div>
+      ${a.img ? `<img class="att-thumb" src="${a.img}" alt="${a.name}" loading="lazy">` : `<div class="att-thumb-placeholder">${a.emoji}</div>`}
       <div class="att-body">
         <div class="att-rank">#${a.rank}</div>
         <div class="att-name">${a.name}</div>
