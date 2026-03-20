@@ -123,6 +123,7 @@ a{color:inherit;text-decoration:none}
 .ftable tbody tr:nth-child(even){background:#fafbfd}
 .ftable tbody tr:hover{background:var(--blue-light)}
 .ftable td{padding:11px 12px;font-size:13px;color:var(--text)}
+.ftable td:nth-child(2),.ftable td:nth-child(3){white-space:nowrap}
 .ftable td.mono{font-family:'Space Mono',monospace;font-size:11px;color:var(--gray)}
 .ftable td.hl{color:var(--teal);font-weight:700}
 .ftable td.pending{color:#e08000;font-weight:700;font-family:'Space Mono',monospace;font-size:11px}
@@ -380,6 +381,29 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
 .p-bar-agree{height:8px;background:#0e8a7c;border-radius:6px;transition:width .4s}
 .p-bar-disagree{height:8px;background:#d63b3b;border-radius:6px;transition:width .4s}
 
+
+/* ── 개인 로그인 ── */
+#loginScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--navy);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px;box-sizing:border-box}
+#loginScreen.hidden{display:none}
+.login-box{background:#fff;border-radius:20px;padding:36px 32px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-logo{font-size:48px;margin-bottom:12px}
+.login-title{font-family:Barlow,sans-serif;font-size:1.4rem;font-weight:800;color:var(--navy);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:28px}
+.pin-input{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+.pin-digit{width:56px;height:64px;border:2px solid var(--border);border-radius:12px;font-size:28px;font-weight:800;text-align:center;font-family:Barlow,sans-serif;color:var(--navy);outline:none;transition:.2s}
+.pin-digit:focus{border-color:var(--blue)}
+.login-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;margin-bottom:12px}
+.login-btn:hover{background:var(--blue)}
+.login-error{color:#d63b3b;font-size:13px;font-weight:600;display:none;margin-bottom:8px}
+/* 개인 대시보드 */
+#myDashboard{display:none;background:var(--bg);border:2px solid var(--teal);border-radius:14px;padding:20px;margin-bottom:20px}
+.my-welcome{font-size:18px;font-weight:800;color:var(--navy);margin-bottom:16px}
+.my-flight-card{background:var(--white);border-radius:10px;padding:16px;margin-bottom:10px;border:1.5px solid var(--border)}
+.my-flight-title{font-size:12px;font-weight:700;color:var(--gray);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.my-flight-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.my-flight-label{font-size:12px;color:var(--gray)}
+.my-flight-value{font-size:14px;font-weight:700;color:var(--navy);font-family:'Space Mono',monospace}
+
 </style>
   <!-- Firebase SDK -->
   <script type="module">
@@ -412,6 +436,41 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
   </script>
 </head>
 <body>
+
+<!-- 로그인 화면 -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">✈️</div>
+    <div class="login-title">ONCHAIN 2140</div>
+    <div class="login-sub" style="font-weight:700;color:var(--navy);font-size:15px;margin-bottom:4px">홍콩 크루즈 리더십 연수</div>
+    <div class="login-sub">전화번호 뒤 4자리를 입력해주세요</div>
+    <div class="pin-input">
+      <input class="pin-digit" id="p1" maxlength="1" type="tel" inputmode="numeric" oninput="pinNext(this,'p2')" onkeydown="pinBack(event,this,'')">
+      <input class="pin-digit" id="p2" maxlength="1" type="tel" inputmode="numeric" oninput="pinNext(this,'p3')" onkeydown="pinBack(event,this,'p1')">
+      <input class="pin-digit" id="p3" maxlength="1" type="tel" inputmode="numeric" oninput="pinNext(this,'p4')" onkeydown="pinBack(event,this,'p2')">
+      <input class="pin-digit" id="p4" maxlength="1" type="tel" inputmode="numeric" oninput="pinNext(this,null)" onkeydown="pinBack(event,this,'p3')">
+    </div>
+    <div class="login-error" id="loginError">❌ 일치하는 정보가 없어요. 다시 확인해주세요.</div>
+    <button class="login-btn" onclick="doLogin()">입장하기</button>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:12px;color:var(--gray)">또는</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
+    <button onclick="showAdminLoginPopup()" style="width:100%;background:none;border:1.5px solid var(--border);border-radius:8px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--gray)">🔒 관리자 로그인</button>
+  </div>
+</div>
+
+<!-- 개인 대시보드 -->
+
+  <!-- 개인 대시보드 -->
+  <div id="myDashboard" class="wrap" style="padding-top:0">
+    <div style="background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:14px;padding:20px 22px;color:#fff;margin-bottom:14px">
+      <div style="font-size:13px;opacity:.8;margin-bottom:4px">안녕하세요 👋</div>
+      <div id="myWelcomeName" style="font-family:Barlow,sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:2px"></div>
+      <div id="myWelcomeNick" style="font-size:13px;opacity:.8"></div>
+    </div>
+    <div id="myFlightCards"></div>
+    <button onclick="exitMyView()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--gray);margin-top:8px">
+      🚪 로그아웃
+    </button>
+  </div>
 
 <!-- 헤더 -->
 <div class="hero">
@@ -944,7 +1003,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
 </div>
 
 <!-- ══ 모달: 관리자 로그인 ══ -->
-<div class="overlay" id="adminLoginOverlay" onclick="closeAdminLogin(event)">
+<div class="overlay" id="adminLoginOverlay" onclick="closeAdminLogin(event)" style="z-index:10000">
   <div class="modal" style="max-width:360px">
     <button class="modal-close" onclick="closeAll()">✕</button>
     <div style="padding:32px 28px">
@@ -1053,7 +1112,7 @@ footer{text-align:center;padding:28px 0 0;font-size:13px;color:var(--gray);borde
     <button class="modal-close" onclick="closeAll()">✕</button>
     <div style="padding:24px 24px 0"><h2 style="font-family:Barlow,sans-serif;font-size:1.3rem;font-weight:700;color:#d63b3b">🚨 비상연락망</h2><p style="font-size:14px;color:#64748b;margin-top:4px;margin-bottom:0">비상 시 아래 연락처를 이용해 주세요</p></div>
     <div class="emg-grid">
-      <div class="emg-card"><div class="role">인솔</div><div class="name">박수영</div><div class="nick">닉네임: 유니</div><div class="phone">010-4999-9416</div></div>
+      <div class="emg-card"><div class="role">인솔</div><div class="name">박수영</div><div class="nick">닉네임: 유니</div><div class="phone">010-4999-4116</div></div>
       <div class="emg-card"><div class="role" style="visibility:hidden">인솔</div><div class="name">박정이</div><div class="nick">닉네임: 맥가이버</div><div class="phone">010-5342-0356</div></div>
       <div class="emg-card"><div class="name">우진희</div><div class="nick">닉네임: 루시</div><div class="phone">010-7387-6114</div></div>
       <div class="emg-card"><div class="name">안정원</div><div class="nick">닉네임: 스텔라</div><div class="phone">010-3662-3459</div></div>
@@ -1098,7 +1157,7 @@ let isAdminLoggedIn = false;
 
 const adminData = [
   {no:1,  name:'박정이',  eng:'PARK JUNG YEE',    passport:'M617T1902', birth:'1963/05/12', phone:'010-5342-0356', gender:'남', room:'스탠다드'},
-  {no:2,  name:'박수영',  eng:'PARK SUYOUNG',     passport:'M501X5561', birth:'1990/11/26', phone:'010-4999-9416', gender:'남', room:'스탠다드'},
+  {no:2,  name:'박수영',  eng:'PARK SUYOUNG',     passport:'M501X5561', birth:'1990/11/26', phone:'010-4999-4116', gender:'남', room:'스탠다드'},
   {no:3,  name:'최경환',  eng:'CHOI KYUNG HWAN',  passport:'M11622822',  birth:'1965/04/28', phone:'010-3828-0303', gender:'남', room:'스탠다드'},
   {no:4,  name:'우진희',  eng:'WOO JIN HEE',      passport:'M016H3305', birth:'1968/12/03', phone:'010-7387-6114', gender:'여', room:'베란다'},
   {no:5,  name:'안정원',  eng:'AN JEONG WON',     passport:'M268N9545', birth:'1965/01/15', phone:'010-3662-3459', gender:'여', room:'베란다'},
@@ -1136,7 +1195,12 @@ function doAdminLogin(){
   const pw = document.getElementById('adminPw').value;
   if(id===ADMIN_ID && pw===ADMIN_PW){
     isAdminLoggedIn = true;
+    currentUser = 'admin';
     document.getElementById('adminError').style.display='none';
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('myDashboard').style.display='none';
+    document.querySelector('.hero').style.display='';
+    document.querySelector('.wrap').style.display='';
     closeAll();
     updateAdminBtn();
     openAdminPanel();
@@ -1182,6 +1246,158 @@ function updateAdminBtn(){
   }
 }
 
+
+
+// ─────────── 로그인 ───────────
+const PAX_DATA = [
+  {name:'박정이', nick:'맥가이버', phone:'010-5342-0356', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26A'},
+  {name:'박수영',  nick:'유니',    phone:'010-4999-4116', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32A', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26C'},
+  {name:'최경환',  nick:'초이스',  phone:'010-3828-0303', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27D'},
+  {name:'우진희',  nick:'루시',    phone:'010-7387-6114', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27D'},
+  {name:'안정원',  nick:'스텔라',  phone:'010-3662-3459', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32B', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26D'},
+  {name:'김재담',  nick:'썬킴',    phone:'010-8253-2411', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'33K', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27E'},
+  {name:'서정희',  nick:'크리스탈',phone:'010-2476-2378', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'33J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26F'},
+  {name:'김도은',  nick:'도은',    phone:'010-9969-7457', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32K', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26G'},
+  {name:'우종선',  nick:'JS우',    phone:'010-6323-0952', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'33H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27F'},
+  {name:'박승범',  nick:'세일러',  phone:'010-7378-2225', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'34K', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25H'},
+  {name:'현승희',  nick:'승희',    phone:'010-2201-0231', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'34J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25K'},
+  {name:'황중일',  nick:'중일',    phone:'010-5758-8192', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'35K', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25G'},
+  {name:'정금자',  nick:'금자',    phone:'010-5387-8192', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'35J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25F'},
+  {name:'김채은',  nick:'채은',    phone:'010-3606-1523', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'35H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25D'},
+  {name:'김무성',  nick:'무성',    phone:'010-2086-5435', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'33A', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25A'},
+  {name:'김경애',  nick:'경애',    phone:'010-5092-1407', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'34H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25E'},
+  {name:'최운화',  nick:'운화',    phone:'010-3615-9428', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23G', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23G'},
+  {name:'김인자',  nick:'인자',    phone:'010-4723-1982', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23F', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23F'},
+  {name:'김명순',  nick:'명순',    phone:'010-2940-3558', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23E', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23E'},
+  {name:'주재순',  nick:'재순',    phone:'010-4166-2747', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23D', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23D'},
+  {name:'박평심',  nick:'평심',    phone:'010-4931-1866', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23C', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23C'},
+  {name:'김수영',  nick:'수영',    phone:'010-3622-9644', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23A', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23A'},
+];
+
+let currentUser = null; // null=로그인전, 'admin'=관리자, {pax}=일반
+
+function pinNext(el, nextId){
+  el.value = el.value.replace(/[^0-9]/g,'');
+  if(el.value && nextId) document.getElementById(nextId).focus();
+  if(!nextId && el.value) doLogin();
+}
+function pinBack(e, el, prevId){
+  if(e.key==='Backspace' && !el.value && prevId) document.getElementById(prevId).focus();
+}
+
+function doLogin(){
+  const pin = ['p1','p2','p3','p4'].map(id=>document.getElementById(id).value).join('');
+  if(pin.length < 4) return;
+  const matched = PAX_DATA.filter(p => p.phone.slice(-4) === pin);
+  if(matched.length === 0){
+    document.getElementById('loginError').style.display = 'block';
+    ['p1','p2','p3','p4'].forEach(id=>{ document.getElementById(id).value=''; });
+    document.getElementById('p1').focus();
+    return;
+  }
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginScreen').classList.add('hidden');
+  if(matched.length === 1){
+    enterUserMode(matched[0]);
+  } else {
+    showNameSelect(matched);
+  }
+}
+
+function showAdminLoginPopup(){
+  document.getElementById('adminId').value='admin1';
+  document.getElementById('adminPw').value='';
+  document.getElementById('adminError').style.display='none';
+  document.getElementById('adminLoginOverlay').classList.add('show');
+}
+
+function showFullSite(){
+  // 전체 사이트 표시 (관리자용)
+  document.querySelector('.hero').style.display='';
+  document.querySelector('.wrap').style.display='';
+  document.getElementById('myDashboard').style.display='none';
+}
+
+function enterUserMode(pax){
+  currentUser = pax;
+  // 메인 사이트 숨기기
+  document.querySelector('.hero').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  // 개인 대시보드 표시
+  showMyDashboard(pax);
+  // 커뮤니티 닉네임 자동 선택
+  setTimeout(()=>{
+    const sel = document.getElementById('myNickSelect');
+    if(sel){ sel.value = pax.nick; onNickChange(); }
+  }, 100);
+}
+
+function showMyDashboard(pax){
+  document.getElementById('myWelcomeName').textContent = pax.name + ' 님';
+  document.getElementById('myWelcomeNick').textContent = '닉네임: ' + pax.nick;
+
+  // 22명 명단 (이름+닉네임만)
+  const memberList = PAX_DATA.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);${p.phone===pax.phone?'background:var(--blue-light);border-radius:8px;':''}">
+      <span style="font-size:12px;color:var(--gray);width:20px;text-align:center">${i+1}</span>
+      <span style="font-weight:700;color:var(--navy);font-size:14px">${p.name}</span>
+      <span style="font-size:12px;color:var(--gray);background:var(--bg);border-radius:4px;padding:2px 8px">${p.nick}</span>
+      ${p.phone===pax.phone?'<span style="font-size:11px;color:var(--blue);font-weight:700;margin-left:auto">나</span>':''}
+    </div>`).join('');
+
+  document.getElementById('myFlightCards').innerHTML = `
+    <div class="my-flight-card">
+      <div class="my-flight-title">✈ 가는 편 (04.24)</div>
+      <div class="my-flight-row"><span class="my-flight-label">항공편</span><span class="my-flight-value">${pax.flight1}</span></div>
+      <div class="my-flight-row"><span class="my-flight-label">출발</span><span class="my-flight-value">${pax.dep1}</span></div>
+      <div class="my-flight-row"><span class="my-flight-label">도착</span><span class="my-flight-value">${pax.arr1}</span></div>
+      <div class="my-flight-row"><span class="my-flight-label">내 좌석</span><span class="my-flight-value" style="font-size:22px;color:var(--teal)">${pax.seat1}</span></div>
+    </div>
+    <div class="my-flight-card">
+      <div class="my-flight-title">✈ 귀국 편 (04.28 새벽)</div>
+      <div class="my-flight-row"><span class="my-flight-label">항공편</span><span class="my-flight-value">${pax.flight2}</span></div>
+      <div class="my-flight-row"><span class="my-flight-label">출발</span><span class="my-flight-value">${pax.dep2}</span></div>
+      <div class="my-flight-row"><span class="my-flight-label">도착</span><span class="my-flight-value">${pax.arr2}</span></div>
+      <div class="my-flight-row"><span class="my-flight-label">내 좌석</span><span class="my-flight-value" style="font-size:22px;color:var(--blue)">${pax.seat2}</span></div>
+    </div>
+    <div class="my-flight-card">
+      <div class="my-flight-title">👥 참석자 명단 (22명)</div>
+      ${memberList}
+    </div>`;
+
+  document.getElementById('myDashboard').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function showNameSelect(list){
+  const box = document.querySelector('.login-box');
+  box.innerHTML = `
+    <div class="login-logo">👤</div>
+    <div class="login-title" style="margin-bottom:6px">본인 이름을 선택해주세요</div>
+    <div class="login-sub">동일한 번호가 여러 명이에요</div>
+    ${list.map(p=>`<button onclick="selectPax('${p.phone}')"
+      style="display:block;width:100%;padding:13px;margin-bottom:8px;background:var(--blue-light);border:1.5px solid var(--blue);border-radius:8px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--navy)">
+      ${p.name} <span style="font-size:13px;color:var(--gray)">(${p.nick})</span>
+    </button>`).join('')}`;
+}
+
+function selectPax(phone){
+  const pax = PAX_DATA.find(p=>p.phone===phone);
+  if(pax){
+    document.getElementById('loginScreen').classList.add('hidden');
+    enterUserMode(pax);
+  }
+}
+
+function exitMyView(){
+  // 로그아웃 → 로그인 화면으로
+  currentUser = null;
+  document.getElementById('myDashboard').style.display='none';
+  document.querySelector('.hero').style.display='';
+  document.querySelector('.wrap').style.display='';
+  ['p1','p2','p3','p4'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
 
 // ─────────── 커뮤니티 (Firebase) ───────────
 const NICKS = ['맥가이버','유니','초이스','루시','스텔라','썬킴','크리스탈','도은',
