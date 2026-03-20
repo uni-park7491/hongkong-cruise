@@ -419,84 +419,131 @@ body.is-admin .qn-btn.admin-only { display: flex !important; }
 
 
 /* ── 탑승권 모달 (명단) ── */
-#memberBpOverlay .modal { max-width:440px; padding:0; overflow:hidden; background:transparent; box-shadow:none; }
-.mbp-wrap { border-radius:12px; overflow:hidden; font-family:inherit; box-shadow:0 8px 40px rgba(0,0,0,.4); }
-.mbp-tabs { display:flex; }
-.mbp-tab { flex:1; padding:11px; text-align:center; font-size:13px; font-weight:700; cursor:pointer; transition:.2s; border:none; font-family:inherit; }
-.mbp-tab.active { opacity:1; }
-.mbp-tab.inactive { opacity:.45; filter:brightness(.7); }
+#memberBpOverlay .modal { max-width:500px; padding:0; background:transparent; box-shadow:none; }
+.mbp-wrap { font-family:'Helvetica Neue',Arial,sans-serif; }
+.mbp-tabs { display:flex; border-radius:10px 10px 0 0; overflow:hidden; }
+.mbp-tab { flex:1; padding:12px; text-align:center; font-size:13px; font-weight:700; cursor:pointer; border:none; font-family:inherit; transition:.2s; }
+.mbp-tab.inactive { opacity:.4; }
 
-/* ── 아시아나 실제 디자인 ── */
-.mbp-asiana .mbp-tab { background:#00256c; color:#fff; }
-.mbp-asiana .mbp-tab.active { background:#d0021b; }
-.mbp-asiana-card { background:#fff; }
-/* 상단 헤더 */
-.mbp-asiana-header { background:#00256c; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
-.mbp-asiana-logo { color:#fff; font-size:14px; font-weight:800; letter-spacing:.05em; }
-.mbp-asiana-alliance { color:#a8bce8; font-size:9px; letter-spacing:.08em; }
-.mbp-asiana-class { color:#fff; font-size:14px; font-weight:800; letter-spacing:.1em; }
-/* 메인 바디 */
-.mbp-asiana-body { display:flex; padding:0; }
-/* 왼쪽 바코드 영역 */
-.mbp-asiana-left { background:#f5f5f5; padding:12px 8px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-width:60px; border-right:1px solid #ddd; }
-.mbp-barcode { writing-mode:vertical-rl; font-size:8px; color:#333; letter-spacing:2px; font-family:monospace; background:repeating-linear-gradient(90deg,#000 0,#000 2px,#fff 2px,#fff 4px); width:30px; height:100px; opacity:.8; }
-/* 오른쪽 메인 */
-.mbp-asiana-right { flex:1; padding:14px 16px; }
-.mbp-asiana-row { display:flex; gap:8px; margin-bottom:10px; }
-.mbp-asiana-field { flex:1; }
-.mbp-asiana-label { font-size:9px; color:#666; letter-spacing:.05em; text-transform:uppercase; margin-bottom:2px; }
-.mbp-asiana-value { font-size:13px; font-weight:700; color:#222; }
-.mbp-asiana-route { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-.mbp-asiana-code { font-size:24px; font-weight:900; color:#00256c; font-family:Barlow,sans-serif; }
-.mbp-asiana-arrow { font-size:18px; color:#999; }
-/* 탑승시간 큰박스 */
-.mbp-boarding-big { background:#f0f4ff; border:2px solid #00256c; border-radius:6px; padding:8px 12px; text-align:center; margin-bottom:10px; }
-.mbp-boarding-label { font-size:9px; color:#00256c; font-weight:700; letter-spacing:.05em; }
-.mbp-boarding-time { font-size:26px; font-weight:900; color:#00256c; font-family:Barlow,sans-serif; line-height:1.1; }
-/* 좌석 큰박스 */
-.mbp-seat-big { background:#00256c; border-radius:6px; padding:8px 12px; text-align:center; }
-.mbp-seat-label { font-size:9px; color:#a8bce8; letter-spacing:.05em; }
-.mbp-seat-num { font-size:32px; font-weight:900; color:#fff; font-family:Barlow,sans-serif; line-height:1.1; }
-/* 존 */
-.mbp-zone { font-size:13px; font-weight:800; color:#555; letter-spacing:.1em; margin-top:6px; text-align:center; }
+/* ═══ 아시아나 티켓 (실제 디자인) ═══ */
+.ticket-asiana {
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.25);
+  border:1px solid #ddd;
+  font-family:'Helvetica Neue',Arial,sans-serif;
+}
+/* 상단 컬러 줄 */
+.az-stripe { height:6px; background:linear-gradient(90deg,#00256c 0%,#00256c 40%,#c8102e 40%,#c8102e 100%); }
+/* 헤더 */
+.az-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid #eee; }
+.az-header-left { display:flex; align-items:center; gap:8px; }
+.az-header-airline { font-size:12px; font-weight:800; color:#111; letter-spacing:.04em; }
+.az-header-alliance { font-size:8px; color:#666; border-left:1px solid #ccc; padding-left:8px; letter-spacing:.04em; }
+.az-header-economy { font-size:18px; font-weight:900; color:#111; letter-spacing:.08em; }
+/* 메인 2단 레이아웃 */
+.az-main { display:flex; }
+/* 왼쪽 큰 섹션 */
+.az-section-left { flex:1.4; padding:12px 14px; border-right:2px dashed #ccc; position:relative; display:flex; gap:10px; }
+/* 바코드 */
+.az-barcode-wrap { width:36px; flex-shrink:0; }
+.az-barcode-img { background:repeating-linear-gradient(180deg,#000 0,#000 3px,#fff 3px,#fff 5px,#000 5px,#000 7px,#fff 7px,#fff 11px,#000 11px,#000 12px,#fff 12px,#fff 14px,#000 14px,#000 15px,#fff 15px,#fff 18px); width:32px; height:140px; border-radius:2px; }
+/* 왼쪽 텍스트 */
+.az-content { flex:1; }
+.az-name-label { font-size:8px; color:#555; letter-spacing:.06em; margin-bottom:1px; }
+.az-name-val { font-size:13px; font-weight:700; color:#111; margin-bottom:8px; }
+.az-flight-row { display:flex; align-items:baseline; gap:6px; margin-bottom:2px; }
+.az-fl-label { font-size:8px; color:#555; letter-spacing:.06em; }
+.az-fl-val { font-size:12px; font-weight:700; color:#111; }
+/* FROM → TO */
+.az-route-row { display:flex; align-items:center; gap:10px; margin:8px 0 12px; }
+.az-route-item { text-align:center; }
+.az-route-label { font-size:8px; color:#555; letter-spacing:.06em; margin-bottom:1px; }
+.az-route-code { font-size:16px; font-weight:900; color:#111; font-family:Barlow,sans-serif; }
+.az-route-arrow { font-size:18px; color:#333; font-weight:300; margin:0 4px; padding-top:12px; }
+/* 박스들 */
+.az-box-row { display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.az-boarding-box { border:1.5px solid #111; padding:5px 10px; min-width:90px; }
+.az-boarding-box-label { font-size:8px; color:#111; letter-spacing:.06em; margin-bottom:2px; }
+.az-boarding-box-val { font-size:22px; font-weight:900; color:#111; font-family:Barlow,sans-serif; line-height:1; }
+.az-gate-box { border:1.5px solid #111; padding:5px 10px; min-width:70px; min-height:44px; }
+.az-gate-label { font-size:8px; color:#111; letter-spacing:.06em; }
+/* ZONE */
+.az-zone-row { display:flex; justify-content:flex-end; margin-bottom:8px; }
+.az-zone-txt { font-size:20px; font-weight:900; color:#111; letter-spacing:.15em; }
 /* 하단 */
-.mbp-asiana-footer { background:#00256c; padding:8px 16px; display:flex; justify-content:space-between; align-items:center; }
-.mbp-asiana-footer span { color:#a8bce8; font-size:10px; }
-/* 점선 분리 */
-.mbp-dashed { border-top:2px dashed #ccc; margin:0 16px; position:relative; }
-.mbp-dashed::before,.mbp-dashed::after { content:''; position:absolute; top:-8px; width:16px; height:16px; background:#e8effe; border-radius:50%; border:2px dashed #ccc; }
-.mbp-dashed::before { left:-24px; }
-.mbp-dashed::after { right:-24px; }
+.az-left-footer { border-top:1px solid #eee; padding-top:8px; }
+.az-notice-txt { font-size:8px; color:#555; margin-bottom:4px; }
+.az-etkt { font-size:10px; font-weight:700; color:#111; letter-spacing:.04em; }
 
-/* ── 에어프레미아 실제 디자인 ── */
-.mbp-premia .mbp-tab { background:#1a2456; color:#fff; }
-.mbp-premia .mbp-tab.active { background:#e8333a; }
-.mbp-premia-card { background:#fff; }
-.mbp-premia-header { background:#1a2456; padding:10px 16px; display:flex; align-items:center; gap:8px; }
-.mbp-premia-dot { width:10px; height:10px; background:#e8333a; border-radius:50%; }
-.mbp-premia-logo { color:#fff; font-size:14px; font-weight:800; letter-spacing:.05em; }
-.mbp-premia-bp { color:#a8bcd0; font-size:11px; margin-left:4px; }
-.mbp-premia-body { display:flex; padding:14px 16px; gap:12px; }
-.mbp-premia-left { flex:1; }
-.mbp-premia-right { width:130px; background:#f0f3fa; border-radius:8px; padding:10px 12px; font-size:11px; }
-.mbp-premia-right-row { margin-bottom:6px; }
-.mbp-premia-right-label { font-size:9px; color:#888; letter-spacing:.05em; }
-.mbp-premia-right-value { font-size:12px; font-weight:700; color:#1a2456; }
-/* 메인 정보 행 */
-.mbp-premia-main-row { display:flex; gap:8px; margin-bottom:10px; align-items:flex-end; }
-.mbp-premia-main-item { text-align:center; flex:1; }
-.mbp-premia-main-label { font-size:9px; font-weight:700; color:#e8333a; letter-spacing:.03em; margin-bottom:2px; }
-.mbp-premia-main-label.gray { color:#666; }
-.mbp-premia-main-oval { background:#f0f0f0; border-radius:30px; padding:8px 6px; }
-.mbp-premia-main-value { font-size:16px; font-weight:900; color:#1a2456; font-family:Barlow,sans-serif; }
-.mbp-premia-main-value.red { color:#e8333a; }
-/* 좌석 */
-.mbp-premia-seat-wrap { text-align:center; margin-bottom:8px; }
-.mbp-premia-seat-label { font-size:10px; color:#888; letter-spacing:.05em; }
-.mbp-premia-seat-num { font-size:38px; font-weight:900; color:#1a2456; font-family:Barlow,sans-serif; line-height:1.1; }
-.mbp-premia-zone { font-size:16px; font-weight:900; color:#1a2456; letter-spacing:.15em; text-align:center; margin-top:6px; }
-.mbp-premia-footer { background:#1a2456; padding:8px 16px; }
-.mbp-premia-footer p { color:#9ab; font-size:9px; margin:0; line-height:1.5; }
+/* 오른쪽 작은 섹션 */
+.az-section-right { width:160px; padding:10px 12px; background:#fafafa; }
+.az-right-title { font-size:8px; color:#555; margin-bottom:1px; letter-spacing:.04em; }
+.az-right-airline { font-size:10px; font-weight:800; color:#111; margin-bottom:8px; letter-spacing:.04em; }
+.az-right-row { margin-bottom:5px; }
+.az-right-label { font-size:8px; color:#555; letter-spacing:.06em; }
+.az-right-val { font-size:10px; font-weight:700; color:#111; }
+/* 좌석 박스 */
+.az-right-seat-box { border:1.5px solid #111; padding:5px 8px; margin:8px 0; display:flex; align-items:baseline; gap:6px; }
+.az-right-seat-label { font-size:8px; color:#555; letter-spacing:.04em; }
+.az-right-seat-num { font-size:22px; font-weight:900; color:#111; font-family:Barlow,sans-serif; }
+.az-right-seat-type { font-size:18px; font-weight:900; color:#111; margin-left:auto; }
+.az-right-footer { border-top:1px solid #ddd; padding-top:6px; margin-top:6px; }
+.az-right-footer-row { display:flex; justify-content:space-between; font-size:8px; color:#555; margin-bottom:3px; }
+
+/* ═══ 에어프레미아 티켓 (실제 디자인 세로형) ═══ */
+.ticket-premia {
+  background:#f5f5f3;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.25);
+  max-width:340px;
+  margin:0 auto;
+  font-family:'Helvetica Neue',Arial,sans-serif;
+}
+/* 상단 로고 */
+.yp-header {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:16px 20px 8px;
+}
+.yp-dot { width:13px; height:13px; background:#e63946; border-radius:50%; flex-shrink:0; }
+.yp-logo-text { font-size:20px; font-weight:900; color:#1c2b5e; letter-spacing:-.02em; font-style:italic; }
+.yp-logo-text span { color:#e63946; font-style:normal; }
+.yp-bp-label { font-size:11px; color:#444; margin-left:4px; font-weight:400; font-style:normal; }
+/* 이름/노선 */
+.yp-name-area { padding:0 20px 10px; }
+.yp-pax-name { font-size:15px; font-weight:800; color:#111; letter-spacing:.04em; margin-bottom:2px; }
+.yp-route-line { font-size:14px; font-weight:700; color:#111; letter-spacing:.06em; }
+/* 편명/날짜 */
+.yp-flight-area { padding:0 20px 12px; display:flex; align-items:baseline; gap:10px; }
+.yp-fl-label { font-size:10px; color:#555; }
+.yp-fl-val { font-size:13px; font-weight:700; color:#111; }
+/* 타원 3개 행 */
+.yp-ovals-row { padding:0 14px 14px; display:flex; gap:10px; align-items:flex-start; }
+.yp-oval-item { flex:1; text-align:center; }
+.yp-oval-lbl { font-size:9px; font-weight:700; color:#e63946; letter-spacing:.02em; line-height:1.3; margin-bottom:6px; min-height:26px; display:flex; align-items:center; justify-content:center; text-align:center; }
+.yp-oval-lbl.gray { color:#333; font-weight:400; }
+.yp-oval-shape { background:#e8e8e5; border-radius:40px; padding:12px 8px; }
+.yp-oval-time { font-size:18px; font-weight:900; color:#111; font-family:Barlow,sans-serif; line-height:1; }
+/* 게이트 (빨간 텍스트) */
+.yp-oval-lbl.gate-lbl { color:#e63946; }
+.yp-oval-gate { font-size:18px; font-weight:900; color:#111; font-family:Barlow,sans-serif; }
+/* 좌석 - 오른쪽 아래 큰 글씨 */
+.yp-seat-area { display:flex; align-items:flex-end; justify-content:flex-end; padding:0 20px 10px; gap:8px; }
+.yp-seat-lbl { font-size:11px; color:#555; padding-bottom:4px; }
+.yp-seat-num { font-size:42px; font-weight:900; color:#111; font-family:Barlow,sans-serif; line-height:1; }
+/* 하단 안내 + 바코드 */
+.yp-bottom { padding:10px 20px 0; border-top:1px solid #ddd; }
+.yp-notice { font-size:8.5px; color:#444; line-height:1.6; margin-bottom:8px; }
+.yp-barcode-area { background:repeating-linear-gradient(90deg,#111 0,#111 2px,#fff 2px,#fff 4px,#111 4px,#111 5px,#fff 5px,#fff 8px,#111 8px,#111 9px,#fff 9px,#fff 12px); height:36px; border-radius:2px; margin-bottom:12px; }
+
+/* 저장 버튼 */
+.mbp-save-btn { display:block; width:100%; margin-top:8px; background:linear-gradient(135deg,#0e8a7c,#1e5fd4); color:#fff; border:none; border-radius:10px; padding:13px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; transition:.2s; }
+.mbp-save-btn:hover { opacity:.9; }
+.mbp-save-btn:active { transform:scale(.98); }
 
 </style>
   <!-- Firebase SDK -->
@@ -528,6 +575,7 @@ body.is-admin .qn-btn.admin-only { display: flex !important; }
       window.dispatchEvent(new Event('fbready'));
     }
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -1573,187 +1621,126 @@ function switchMemberBpTab(tab, phone){
 }
 
 function renderMemberBp(p){
-  const isAsiana1 = p.flight1 === 'OZ721';
-  const isGo = memberBpTab === 'go';
-  const flight = isGo ? p.flight1 : p.flight2;
-  const dep = isGo ? p.dep1 : p.dep2;
-  const arr = isGo ? p.arr1 : p.arr2;
-  const seat = isGo ? p.seat1 : p.seat2;
-  const from = isGo ? 'ICN' : 'HKG';
-  const to = isGo ? 'HKG' : 'ICN';
-  const fromFull = isGo ? '서울/인천' : '홍콩';
-  const toFull = isGo ? '홍콩' : '서울/인천';
-  const date = isGo ? '2026.04.24' : '2026.04.28';
-  const isAsiana = isGo ? isAsiana1 : true;
-  const depTime = dep.split(' ').pop();
-  const arrTime = arr.split(' ').pop();
-  // 탑승시간 = 출발 40분 전
-  const depH = parseInt(depTime.split(':')[0]);
-  const depM = parseInt(depTime.split(':')[1]);
-  const brdM = depM - 40 < 0 ? depM + 20 : depM - 40;
-  const brdH = depM - 40 < 0 ? depH - 1 : depH;
-  const boardingTime = `${String(brdH).padStart(2,'0')}:${String(brdM).padStart(2,'0')}`;
-  const terminal = isGo ? (isAsiana1?'T2':'T1') : 'T1';
+  var isAsiana1 = p.flight1 === 'OZ721';
+  var isGo = memberBpTab === 'go';
+  var flight = isGo ? p.flight1 : p.flight2;
+  var dep = isGo ? p.dep1 : p.dep2;
+  var seat = isGo ? p.seat1 : p.seat2;
+  var from = isGo ? 'ICN' : 'HKG';
+  var to = isGo ? 'HKG' : 'ICN';
+  var fromName = isGo ? '서울/인천' : '홍콩';
+  var toName = isGo ? '홍콩' : '서울/인천';
+  var date = isGo ? '24APR26' : '28APR26';
+  var isAsiana = isGo ? isAsiana1 : true;
+  var terminal = isGo ? (isAsiana1 ? 'T2' : 'T1') : 'T1';
+  var depTime = dep.split(' ').pop();
+  var parts = depTime.split(':').map(Number);
+  var brdTotal = parts[0] * 60 + parts[1] - 40;
+  var boardingTime = String(Math.floor(brdTotal/60)).padStart(2,'0') + ':' + String(brdTotal%60).padStart(2,'0');
+  var tabBg = isAsiana ? '#002868' : '#1c2b5e';
+  var tabActive = isAsiana ? '#c8102e' : '#e63946';
+  var goActive = memberBpTab === 'go';
+  var h = '';
 
-  let content = '';
   if(isAsiana){
-    content = `<div class="mbp-asiana-card">
-      <div class="mbp-asiana-header">
-        <div>
-          <div class="mbp-asiana-logo">ASIANA AIRLINES</div>
-          <div class="mbp-asiana-alliance">★ A STAR ALLIANCE MEMBER ★</div>
-        </div>
-        <div class="mbp-asiana-class">ECONOMY</div>
-      </div>
-      <div class="mbp-asiana-body">
-        <div class="mbp-asiana-left">
-          <div style="font-size:9px;color:#888;writing-mode:vertical-rl;letter-spacing:1px">BOARDING PASS</div>
-          <div class="mbp-barcode"></div>
-          <div style="font-size:8px;color:#888;writing-mode:vertical-rl">${flight}</div>
-        </div>
-        <div class="mbp-asiana-right">
-          <div class="mbp-asiana-row">
-            <div class="mbp-asiana-field">
-              <div class="mbp-asiana-label">NAME</div>
-              <div class="mbp-asiana-value">${p.name} (${p.nick})</div>
-            </div>
-          </div>
-          <div class="mbp-asiana-row">
-            <div class="mbp-asiana-field">
-              <div class="mbp-asiana-label">FLIGHT NO.</div>
-              <div class="mbp-asiana-value">${flight}</div>
-            </div>
-            <div class="mbp-asiana-field">
-              <div class="mbp-asiana-label">DATE</div>
-              <div class="mbp-asiana-value">${date}</div>
-            </div>
-          </div>
-          <div class="mbp-asiana-route">
-            <div>
-              <div class="mbp-asiana-code">${from}</div>
-              <div style="font-size:9px;color:#888">${fromFull}</div>
-            </div>
-            <div class="mbp-asiana-arrow">→</div>
-            <div>
-              <div class="mbp-asiana-code">${to}</div>
-              <div style="font-size:9px;color:#888">${toFull}</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <div style="flex:1">
-              <div class="mbp-boarding-big">
-                <div class="mbp-boarding-label">BOARDING TIME</div>
-                <div class="mbp-boarding-time">${boardingTime}</div>
-              </div>
-            </div>
-            <div style="flex:1">
-              <div class="mbp-boarding-big" style="background:#fff0f0;border-color:#d0021b">
-                <div class="mbp-boarding-label" style="color:#d0021b">DEPARTURE</div>
-                <div class="mbp-boarding-time" style="color:#d0021b">${depTime}</div>
-              </div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <div style="flex:1">
-              <div class="mbp-seat-big">
-                <div class="mbp-seat-label">SEAT NO.</div>
-                <div class="mbp-seat-num">${seat}</div>
-              </div>
-            </div>
-            <div style="flex:1">
-              <div class="mbp-zone">ZONE 3</div>
-              <div style="font-size:9px;color:#888;text-align:center;margin-top:4px">TERMINAL ${terminal}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="mbp-dashed" style="margin:0 12px"></div>
-      <div class="mbp-asiana-footer">
-        <span>항공기 출발 10분 전 탑승 마감</span>
-        <span>${flight} · ${seat}</span>
-      </div>
-    </div>`;
+    h += '<div class="ticket-asiana" id="ticketRender">';
+    h += '<div class="az-stripe"></div>';
+    h += '<div class="az-header">';
+    h += '<div class="az-header-left"><div class="az-header-airline">ASIANA AIRLINES</div>';
+    h += '<div class="az-header-alliance">&#9733; A STAR ALLIANCE MEMBER &#9733;</div></div>';
+    h += '<div class="az-header-economy">ECONOMY</div></div>';
+    h += '<div class="az-main"><div class="az-section-left">';
+    h += '<div class="az-barcode-wrap"><div class="az-barcode-img"></div></div>';
+    h += '<div class="az-content">';
+    h += '<div class="az-name-label">NAME</div>';
+    h += '<div class="az-name-val">' + p.name + ' / ' + p.nick + '</div>';
+    h += '<div class="az-flight-row"><span class="az-fl-label">FLIGHT NO.</span>';
+    h += '<span class="az-fl-val">' + flight + '</span>';
+    h += '<span class="az-fl-val" style="font-weight:400;color:#555"> /' + date + '</span></div>';
+    h += '<div class="az-route-row">';
+    h += '<div class="az-route-item"><div class="az-route-label">FROM</div><div class="az-route-code">' + from + '</div></div>';
+    h += '<div class="az-route-arrow">&#x2192;</div>';
+    h += '<div class="az-route-item"><div class="az-route-label">TO</div><div class="az-route-code">' + to + '</div></div></div>';
+    h += '<div class="az-boxes">';
+    h += '<div class="az-boarding-box"><div class="az-boarding-box-label">BOARDING TIME</div><div class="az-boarding-box-val">' + boardingTime + '</div></div>';
+    h += '<div class="az-boarding-box" style="border-color:#c8102e"><div class="az-boarding-box-label" style="color:#c8102e">DEP. TIME</div><div class="az-boarding-box-val" style="color:#c8102e">' + depTime + '</div></div>';
+    h += '<div class="az-seat-box"><div class="az-seat-label">SEAT NO.</div><div class="az-seat-val">' + seat + '</div></div></div>';
+    h += '<div class="az-zone-gate"><div class="az-zone">ZONE 3</div>';
+    h += '<div style="font-size:9px;color:#888;margin-left:8px">TERMINAL ' + terminal + '</div></div></div>';
+    h += '<div class="az-section-right">';
+    h += '<div class="az-right-title">Boarding Pass &nbsp; 탑승권</div>';
+    h += '<div class="az-right-airline">ASIANA AIRLINES</div>';
+    h += '<div class="az-right-row"><div class="az-right-label">FLIGHT</div><div class="az-right-val">' + flight + ' / ' + date + '</div></div>';
+    h += '<div class="az-right-row"><div class="az-right-label">FROM</div><div class="az-right-val">' + fromName.toUpperCase() + '</div></div>';
+    h += '<div class="az-right-row"><div class="az-right-label">TO</div><div class="az-right-val">' + toName.toUpperCase() + '</div></div>';
+    h += '<div class="az-right-row"><div class="az-right-label">NAME</div><div class="az-right-val">' + p.name + '</div></div>';
+    h += '<div class="az-right-row"><div class="az-right-label">DEP.TIME</div><div class="az-right-val">' + depTime + '</div></div>';
+    h += '<div style="font-size:8px;color:#555;letter-spacing:.06em;margin-top:8px;margin-bottom:2px">SEAT NO.</div>';
+    h += '<div class="az-right-seat-box"><div><div class="az-right-seat-label">ECONOMY</div>';
+    h += '<div class="az-right-seat-num">' + seat + '</div></div></div>';
+    h += '<div class="az-right-footer"><div class="az-right-footer-row"><span>Silver</span><span></span></div>';
+    h += '<div class="az-right-footer-row"><span>TIMES</span><span>MILES</span></div></div>';
+    h += '</div></div>';
+    h += '<div class="az-divider"></div>';
+    h += '<div class="az-footer"><span>항공기 출발 10분 전 탑승 마감</span><span>' + flight + ' &middot; SEAT ' + seat + '</span></div>';
+    h += '<div class="az-notice">Boarding gate closes 10minutes prior to departure time. (항공기 출발 10분 전에 탑승이 마감됩니다.)</div>';
+    h += '</div>';
   } else {
-    content = `<div class="mbp-premia-card">
-      <div class="mbp-premia-header">
-        <div class="mbp-premia-dot"></div>
-        <div class="mbp-premia-logo">AIR PREMIA</div>
-        <div class="mbp-premia-bp">Boarding pass</div>
-      </div>
-      <div class="mbp-premia-body">
-        <div class="mbp-premia-left">
-          <div style="font-size:12px;font-weight:700;color:#1a2456;margin-bottom:10px">${p.name} (${p.nick})</div>
-          <div class="mbp-premia-main-row">
-            <div class="mbp-premia-main-item">
-              <div class="mbp-premia-main-label">Boarding<br>Time</div>
-              <div class="mbp-premia-main-oval">
-                <div class="mbp-premia-main-value red">${boardingTime}</div>
-              </div>
-            </div>
-            <div class="mbp-premia-main-item">
-              <div class="mbp-premia-main-label gray">Departure<br>Time</div>
-              <div class="mbp-premia-main-oval">
-                <div class="mbp-premia-main-value">${depTime}</div>
-              </div>
-            </div>
-            <div class="mbp-premia-main-item">
-              <div class="mbp-premia-main-label">Gate</div>
-              <div class="mbp-premia-main-oval">
-                <div class="mbp-premia-main-value red">156</div>
-              </div>
-            </div>
-          </div>
-          <div class="mbp-premia-seat-wrap">
-            <div class="mbp-premia-seat-label">Seat</div>
-            <div class="mbp-premia-seat-num">${seat}</div>
-          </div>
-          <div class="mbp-premia-zone">ZONE B</div>
-        </div>
-        <div class="mbp-premia-right">
-          <div class="mbp-premia-right-row">
-            <div class="mbp-premia-right-label">Name</div>
-            <div class="mbp-premia-right-value">${p.name}</div>
-          </div>
-          <div class="mbp-premia-right-row">
-            <div class="mbp-premia-right-label">From</div>
-            <div class="mbp-premia-right-value">${fromFull}</div>
-          </div>
-          <div class="mbp-premia-right-row">
-            <div class="mbp-premia-right-label">To</div>
-            <div class="mbp-premia-right-value">${toFull}</div>
-          </div>
-          <div class="mbp-premia-right-row">
-            <div class="mbp-premia-right-label">Date</div>
-            <div class="mbp-premia-right-value">${date}</div>
-          </div>
-          <div class="mbp-premia-right-row">
-            <div class="mbp-premia-right-label">Flight</div>
-            <div class="mbp-premia-right-value">${flight}</div>
-          </div>
-          <div class="mbp-premia-right-row">
-            <div class="mbp-premia-right-label">Seat</div>
-            <div class="mbp-premia-right-value" style="font-size:16px;font-weight:900">${seat}</div>
-          </div>
-          <div class="mbp-premia-right-row">
-            <div class="mbp-premia-right-label">Terminal</div>
-            <div class="mbp-premia-right-value">${terminal}</div>
-          </div>
-        </div>
-      </div>
-      <div class="mbp-premia-footer">
-        <p>항공기 정시 출발을 위하여 출발 시각 <strong style="color:#fff">10분</strong> 전에 탑승이 종료됩니다.</p>
-      </div>
-    </div>`;
+    h += '<div class="ticket-premia" id="ticketRender">';
+    h += '<div class="yp-header"><div class="yp-dot"></div>';
+    h += '<div class="yp-logo-text"><span>a</span>ir PREMIA</div>';
+    h += '<div class="yp-bp-label">Boarding Pass</div></div>';
+    h += '<div class="yp-name-area">';
+    h += '<div class="yp-pax-name">' + p.name + ' / ' + p.nick + '</div>';
+    h += '<div class="yp-route-line">' + from + ' - ' + to + '</div></div>';
+    h += '<div class="yp-flight-area"><span class="yp-fl-label">Flight</span>';
+    h += '<span class="yp-fl-val">' + flight + '</span>';
+    h += '<span class="yp-fl-val" style="font-weight:400;color:#555"> / ' + date + '</span></div>';
+    h += '<div class="yp-ovals-row">';
+    h += '<div class="yp-oval-item"><div class="yp-oval-lbl">Boarding<br>Time</div>';
+    h += '<div class="yp-oval-shape"><div class="yp-oval-time">' + boardingTime + '</div></div></div>';
+    h += '<div class="yp-oval-item"><div class="yp-oval-lbl gray">Departure<br>Time</div>';
+    h += '<div class="yp-oval-shape"><div class="yp-oval-time">' + depTime + '</div></div></div>';
+    h += '<div class="yp-oval-item"><div class="yp-oval-lbl gate-lbl">Gate</div>';
+    h += '<div class="yp-oval-shape"><div class="yp-oval-gate">C39</div></div></div></div>';
+    h += '<div class="yp-seat-area"><div class="yp-seat-lbl">Seat</div>';
+    h += '<div class="yp-seat-num">' + seat + '</div></div>';
+    h += '<div class="yp-zone">ZONE B</div>';
+    h += '<div class="yp-bottom">';
+    h += '<div class="yp-notice">항공기 정시 출발을 위하여 출발 시각 10분 전에 탑승이 종료됩니다.<br>Boarding gate closes 10minutes prior to departure time.</div>';
+    h += '<div class="yp-barcode-area"></div></div>';
+    h += '</div>';
   }
 
-  document.getElementById('memberBpContent').innerHTML = `
-  <div class="mbp-wrap ${isAsiana?'mbp-asiana':'mbp-premia'}">
-    <div class="mbp-tabs">
-      <button class="mbp-tab ${memberBpTab==='go'?'active':'inactive'}" onclick="switchMemberBpTab('go','${p.phone}')">✈ 가는 편</button>
-      <button class="mbp-tab ${memberBpTab==='return'?'active':'inactive'}" onclick="switchMemberBpTab('return','${p.phone}')">✈ 귀국 편</button>
-    </div>
-    ${content}
-  </div>`;
+  var goStyle = 'background:' + tabBg + ';color:#fff;' + (goActive ? 'background:' + tabActive + ';' : 'opacity:.45;');
+  var retStyle = 'background:' + tabBg + ';color:#fff;' + (!goActive ? 'background:' + tabActive + ';' : 'opacity:.45;');
+  var wrap = '<div class="mbp-wrap"><div class="mbp-tabs">';
+  wrap += '<button class="mbp-tab" style="' + goStyle + '" onclick="switchMemberBpTab(\'go\',\''+p.phone+'\')">✈ 가는 편</button>';
+  wrap += '<button class="mbp-tab" style="' + retStyle + '" onclick="switchMemberBpTab(\'return\',\''+p.phone+'\')">✈ 귀국 편</button>';
+  wrap += '</div>' + h + '</div>';
+  var saveName = p.name + (goActive ? '_가는편' : '_귀국편');
+  var saveBtn = '<button class="mbp-save-btn" onclick="saveTicketImage(\'' + saveName + '\')">📥 탑승권 이미지 저장</button>';
+
+  document.getElementById('memberBpContent').innerHTML = wrap + saveBtn;
+}
+function saveTicketImage(filename){
+  const el = document.getElementById('ticketRender');
+  if(!el){ alert('티켓을 찾을 수 없어요'); return; }
+  const btn = document.querySelector('.mbp-save-btn');
+  btn.textContent = '⏳ 저장 중...';
+  btn.disabled = true;
+  html2canvas(el, { scale:2, useCORS:true, backgroundColor:'#fff' }).then(canvas=>{
+    const a = document.createElement('a');
+    a.download = `${filename}_탑승권.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    btn.textContent = '✅ 저장 완료!';
+    setTimeout(()=>{ btn.textContent='📥 탑승권 이미지 저장'; btn.disabled=false; }, 2000);
+  }).catch(err=>{
+    alert('저장 실패: ' + err.message);
+    btn.textContent = '📥 탑승권 이미지 저장';
+    btn.disabled = false;
+  });
 }
 
 function closeMemberBp(e){
@@ -2430,4 +2417,41 @@ function toggleDone(cb){
 }
 </script>
 </body>
-</html>
+</html>    ticketHtml = `<div class="ticket-premia" id="ticketRender">
+      <div class="yp-logo-row">
+        <div class="yp-red-dot"></div>
+        <div class="yp-logo-text">air premia</div>
+        <div class="yp-bp-text">Boarding Pass</div>
+      </div>
+      <div class="yp-name-row">${p.name} / ${p.nick}</div>
+      <div class="yp-route-row">${from} - ${to}</div>
+      <div class="yp-flight-date">
+        <div class="yp-flight-num">${flight}</div>
+        <div class="yp-flight-date-txt">/ ${date}</div>
+      </div>
+      <div class="yp-ovals-row">
+        <div class="yp-oval-item">
+          <div class="yp-oval-label red">Boarding<br>Time</div>
+          <div class="yp-oval-shape"><div class="yp-oval-val">${boardingTime}</div></div>
+        </div>
+        <div class="yp-oval-item">
+          <div class="yp-oval-label gray">Departure<br>Time</div>
+          <div class="yp-oval-shape"><div class="yp-oval-val">${depTime}</div></div>
+        </div>
+        <div class="yp-oval-item">
+          <div class="yp-oval-label red">Gate</div>
+          <div class="yp-oval-shape"><div class="yp-oval-val">156</div></div>
+        </div>
+        <div class="yp-oval-item" style="flex:1.2">
+          <div class="yp-oval-label gray">Seat</div>
+          <div style="text-align:right">
+            <div class="yp-seat-num">${seat}</div>
+          </div>
+        </div>
+      </div>
+      <div class="yp-bottom">
+        <div class="yp-notice">항공기 정시 출발을 위하여 출발 시각 10분 전에 탑승이 종료됩니다.<br>Boarding gate closes 10minutes prior to departure time.</div>
+        <div class="yp-barcode-h"></div>
+      </div>
+    </div>`;
+  const tabStyle
