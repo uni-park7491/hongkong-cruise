@@ -1435,12 +1435,12 @@ const PAX_DATA = [
   {name:'김채은',  nick:'채은',    phone:'010-3606-1523', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'35H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25D'},
   {name:'김무성',  nick:'무성',    phone:'010-2086-5435', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'33A', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25A'},
   {name:'김경애',  nick:'경애',    phone:'010-5092-1407', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'34H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25E'},
-  {name:'최운화',  nick:'운화',    phone:'010-3615-9428', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23G', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23G'},
-  {name:'김인자',  nick:'인자',    phone:'010-4723-1982', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23F', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23F'},
-  {name:'김명순',  nick:'명순',    phone:'010-2940-3558', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23E', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23E'},
-  {name:'주재순',  nick:'재순',    phone:'010-4166-2747', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23D', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23D'},
-  {name:'박평심',  nick:'평심',    phone:'010-4931-1866', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23C', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23C'},
-  {name:'김수영',  nick:'수영',    phone:'010-3622-9644', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'23A', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23A'},
+  {name:'최운화',  nick:'운화',    phone:'010-3615-9428', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23G'},
+  {name:'김인자',  nick:'인자',    phone:'010-4723-1982', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23F'},
+  {name:'김명순',  nick:'명순',    phone:'010-2940-3558', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23E'},
+  {name:'주재순',  nick:'재순',    phone:'010-4166-2747', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23D'},
+  {name:'박평심',  nick:'평심',    phone:'010-4931-1866', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23C'},
+  {name:'김수영',  nick:'수영',    phone:'010-3622-9644', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23A'},
 ];
 
 let currentUser = null; // null=로그인전, 'admin'=관리자, {pax}=일반
@@ -2417,41 +2417,4 @@ function toggleDone(cb){
 }
 </script>
 </body>
-</html>    ticketHtml = `<div class="ticket-premia" id="ticketRender">
-      <div class="yp-logo-row">
-        <div class="yp-red-dot"></div>
-        <div class="yp-logo-text">air premia</div>
-        <div class="yp-bp-text">Boarding Pass</div>
-      </div>
-      <div class="yp-name-row">${p.name} / ${p.nick}</div>
-      <div class="yp-route-row">${from} - ${to}</div>
-      <div class="yp-flight-date">
-        <div class="yp-flight-num">${flight}</div>
-        <div class="yp-flight-date-txt">/ ${date}</div>
-      </div>
-      <div class="yp-ovals-row">
-        <div class="yp-oval-item">
-          <div class="yp-oval-label red">Boarding<br>Time</div>
-          <div class="yp-oval-shape"><div class="yp-oval-val">${boardingTime}</div></div>
-        </div>
-        <div class="yp-oval-item">
-          <div class="yp-oval-label gray">Departure<br>Time</div>
-          <div class="yp-oval-shape"><div class="yp-oval-val">${depTime}</div></div>
-        </div>
-        <div class="yp-oval-item">
-          <div class="yp-oval-label red">Gate</div>
-          <div class="yp-oval-shape"><div class="yp-oval-val">156</div></div>
-        </div>
-        <div class="yp-oval-item" style="flex:1.2">
-          <div class="yp-oval-label gray">Seat</div>
-          <div style="text-align:right">
-            <div class="yp-seat-num">${seat}</div>
-          </div>
-        </div>
-      </div>
-      <div class="yp-bottom">
-        <div class="yp-notice">항공기 정시 출발을 위하여 출발 시각 10분 전에 탑승이 종료됩니다.<br>Boarding gate closes 10minutes prior to departure time.</div>
-        <div class="yp-barcode-h"></div>
-      </div>
-    </div>`;
-  const tabStyle
+</html>
