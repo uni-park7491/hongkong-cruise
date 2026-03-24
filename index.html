@@ -1124,5 +1124,56 @@
   <script src="assets/js/boarding.js"></script>
   <script src="assets/js/community.js"></script>
   <script src="assets/js/app.js"></script>
+
+  <!-- ══ 초기화 (스플래시 → 로그인) ══ -->
+  <script>
+    // 파티클 생성
+    (function(){
+      const container = document.getElementById('splashParticles');
+      if(container){
+        for(let i=0;i<18;i++){
+          const p = document.createElement('div');
+          p.className = 'splash-particle';
+          const size = Math.random()*12+4;
+          p.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+(Math.random()*100)+'%;animation-duration:'+(Math.random()*4+3)+'s;animation-delay:'+(Math.random()*2)+'s;opacity:'+(Math.random()*.4+.1);
+          container.appendChild(p);
+        }
+      }
+    })();
+
+    // 모든 JS 로드 후 스플래시 숨기기
+    window.addEventListener('load', function(){
+      setTimeout(function(){
+        const splash = document.getElementById('splashScreen');
+        if(splash) splash.classList.add('hidden');
+
+        // 다크모드 복원
+        if(localStorage.getItem('darkMode')==='true'){
+          document.body.classList.add('dark-mode');
+        }
+
+        // 관광지 렌더
+        if(typeof renderAttractions === 'function') renderAttractions();
+
+        // 오늘 일정 하이라이트
+        if(typeof highlightTodaySchedule === 'function') highlightTodaySchedule();
+
+        // D-Day & 시계 시작
+        if(typeof updateDDay === 'function'){ updateDDay(); setInterval(updateDDay, 1000); }
+        if(typeof updateWorldClock === 'function'){ updateWorldClock(); setInterval(updateWorldClock, 1000); }
+
+        // 날씨
+        if(typeof fetchHKWeather === 'function'){ fetchHKWeather(); setInterval(fetchHKWeather, 600000); }
+
+        // 커뮤니티 초기화
+        if(typeof initCommunity === 'function') initCommunity();
+
+        // PWA 설치 배너
+        if(typeof showInstallBanner === 'function') setTimeout(showInstallBanner, 3000);
+
+      }, 2000);
+    });
+  </script>
+
 </body>
 </html>
