@@ -1715,37 +1715,152 @@ body.app-mode .my-flight-card {
   color: #0a1628 !important;
   font-weight: 800 !important;
 }
-/* ── 탑승권 아코디언 레이아웃 수정 ── */
+/* ── 탑승권 아코디언 완전 수정 ── */
 #bpAccordionContent {
-  font-size: 12px !important;
-  overflow: hidden !important;
-  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
 }
+/* 아코디언 안 탑승권 전체 레이아웃 */
 #bpAccordionContent .az-main {
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: column !important;
 }
 #bpAccordionContent .az-section-left {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
+  width: 100% !important;
+  border-right: none !important;
+  border-bottom: 2px dashed #e5e7eb;
+  padding: 14px 16px !important;
+  display: block !important;
+}
+#bpAccordionContent .az-barcode-wrap {
+  display: none !important;
+}
+#bpAccordionContent .az-content {
+  width: 100%;
 }
 #bpAccordionContent .az-section-right {
-  width: 130px !important;
-  flex-shrink: 0;
+  width: 100% !important;
+  background: linear-gradient(135deg,#002868,#001844) !important;
+  padding: 14px 16px !important;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  position: static !important;
 }
-#bpAccordionContent .az-name-val {
+#bpAccordionContent .az-section-right::before,
+#bpAccordionContent .az-section-right::after { display: none !important; }
+#bpAccordionContent .az-right-title {
+  grid-column: span 2;
   font-size: 13px !important;
-  white-space: nowrap;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,.8) !important;
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+#bpAccordionContent .az-right-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#bpAccordionContent .az-right-label { font-size: 9px !important; color: rgba(255,255,255,.5) !important; }
+#bpAccordionContent .az-right-val { font-size: 13px !important; font-weight: 700 !important; color: #fff !important; }
+#bpAccordionContent .az-right-airline { grid-column: span 2; display: none; }
+#bpAccordionContent .az-right-seat-box {
+  grid-column: span 2;
+  background: rgba(255,202,34,.15) !important;
+  border: 1.5px solid rgba(255,202,34,.5) !important;
+  border-radius: 10px !important;
+  padding: 10px !important;
+  text-align: center;
+  margin-top: 4px;
+}
+#bpAccordionContent .az-right-seat-num { font-size: 2rem !important; color: #ffca22 !important; }
+/* 이름, 출발지, 좌석 등 크기 */
+#bpAccordionContent .az-name-val { font-size: 16px !important; font-weight: 800 !important; }
+#bpAccordionContent .az-route-code { font-size: 24px !important; }
+#bpAccordionContent .az-boarding-box-val { font-size: 22px !important; font-weight: 900 !important; }
+#bpAccordionContent .az-boarding-box { padding: 10px !important; }
+#bpAccordionContent .az-boxes { gap: 8px !important; }
+#bpAccordionContent .az-zone-gate { padding: 6px 0 0 !important; }
+/* 에어프레미아 아코디언 */
+#bpAccordionContent .yp-body {
+  flex-direction: column !important;
+}
+#bpAccordionContent .yp-main { width: 100% !important; }
+#bpAccordionContent .yp-right { width: 100% !important; border-left: none !important; border-top: 2px dashed #334155 !important; }
+
+/* ── 탑승권 아코디언 완전 수정 ── */
+#bpAccordionContent {
   overflow: hidden;
-  text-overflow: ellipsis;
+  background: #fff;
 }
-#bpAccordionContent .az-route-code {
-  font-size: 22px !important;
+/* 아코디언 안 탑승권 전체 레이아웃 */
+#bpAccordionContent .az-main {
+  display: flex !important;
+  flex-direction: column !important;
 }
-#bpAccordionContent .az-boarding-box-val {
-  font-size: 20px !important;
+#bpAccordionContent .az-section-left {
+  width: 100% !important;
+  border-right: none !important;
+  border-bottom: 2px dashed #e5e7eb;
+  padding: 14px 16px !important;
+  display: block !important;
 }
-#bpAccordionContent .az-right-seat-num {
-  font-size: 1.6rem !important;
+#bpAccordionContent .az-barcode-wrap {
+  display: none !important;
 }
+#bpAccordionContent .az-content {
+  width: 100%;
+}
+#bpAccordionContent .az-section-right {
+  width: 100% !important;
+  background: linear-gradient(135deg,#002868,#001844) !important;
+  padding: 14px 16px !important;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  position: static !important;
+}
+#bpAccordionContent .az-section-right::before,
+#bpAccordionContent .az-section-right::after { display: none !important; }
+#bpAccordionContent .az-right-title {
+  grid-column: span 2;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,.8) !important;
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+#bpAccordionContent .az-right-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#bpAccordionContent .az-right-label { font-size: 9px !important; color: rgba(255,255,255,.5) !important; }
+#bpAccordionContent .az-right-val { font-size: 13px !important; font-weight: 700 !important; color: #fff !important; }
+#bpAccordionContent .az-right-airline { grid-column: span 2; display: none; }
+#bpAccordionContent .az-right-seat-box {
+  grid-column: span 2;
+  background: rgba(255,202,34,.15) !important;
+  border: 1.5px solid rgba(255,202,34,.5) !important;
+  border-radius: 10px !important;
+  padding: 10px !important;
+  text-align: center;
+  margin-top: 4px;
+}
+#bpAccordionContent .az-right-seat-num { font-size: 2rem !important; color: #ffca22 !important; }
+/* 이름, 출발지, 좌석 등 크기 */
+#bpAccordionContent .az-name-val { font-size: 16px !important; font-weight: 800 !important; }
+#bpAccordionContent .az-route-code { font-size: 24px !important; }
+#bpAccordionContent .az-boarding-box-val { font-size: 22px !important; font-weight: 900 !important; }
+#bpAccordionContent .az-boarding-box { padding: 10px !important; }
+#bpAccordionContent .az-boxes { gap: 8px !important; }
+#bpAccordionContent .az-zone-gate { padding: 6px 0 0 !important; }
+/* 에어프레미아 아코디언 */
+#bpAccordionContent .yp-body {
+  flex-direction: column !important;
+}
+#bpAccordionContent .yp-main { width: 100% !important; }
+#bpAccordionContent .yp-right { width: 100% !important; border-left: none !important; border-top: 2px dashed #334155 !important; }

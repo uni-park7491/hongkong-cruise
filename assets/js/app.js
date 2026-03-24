@@ -533,7 +533,7 @@ function renderAppFlights(content){
     }
     const zone = row<=15?'앞쪽':row<=25?'중간':'뒤쪽';
     return `<div style="background:${color};border-radius:12px;padding:14px;cursor:pointer;grid-column:span 2"
-      onclick="showSeatMapModal('${seat}','${flight}')">
+      data-seat="${seat}" data-flight="${flight}" onclick="showSeatMapModal(this.dataset.seat,this.dataset.flight)">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:4px">내 좌석 · 탭하면 위치 확인</div>
