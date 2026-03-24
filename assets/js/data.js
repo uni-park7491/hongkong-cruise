@@ -26,6 +26,7 @@ const PAX_DATA = [
   {name:'주재순',  nick:'재순',    phone:'010-4166-2747', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23D'},
   {name:'박평심',  nick:'평심',    phone:'010-4931-1866', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23C'},
   {name:'김수영',  nick:'수영',    phone:'010-3622-9644', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23A'},
+  {name:'신경숙',  nick:'경숙',    phone:'010-0000-0000', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'33C', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'24D'},
 ];
 
 // ── adminData ──
@@ -52,6 +53,7 @@ const adminData = [
   {no:20, name:'박평심',  eng:'PARK PEANGSIM',    passport:'M12117778', birth:'1963/08/21', phone:'010-4931-1866', gender:'여', room:'스탠다드'},
   {no:21, name:'김수영',  eng:'KIM SOO YOUNG',    passport:'M810T8840', birth:'1950/04/01', phone:'010-3622-9644', gender:'여', room:'스탠다드'},
   {no:22, name:'김경애',  eng:'KIM GYEONGAE',     passport:'M22124164', birth:'1965/04/05', phone:'010-5092-1407', gender:'여', room:'스탠다드'},
+  {no:23, name:'신경숙',  eng:'SHIN GYEONGSUK',   passport:'',          birth:'1959/10/02', phone:'010-0000-0000', gender:'여', room:'스탠다드'},
 ];
 
 // ── attractions ──
