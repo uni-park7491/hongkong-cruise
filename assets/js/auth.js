@@ -17,10 +17,11 @@ function doLogin(){
     return;
   }
   document.getElementById('loginError').style.display = 'none';
-  document.getElementById('loginScreen').classList.add('hidden');
   if(matched.length === 1){
+    document.getElementById('loginScreen').classList.add('hidden');
     enterUserMode(matched[0]);
   } else {
+    // 중복번호 → 이름 선택 팝업
     showNameSelect(matched);
   }
 }
@@ -271,20 +272,48 @@ function showMyDashboard(pax){
 }
 
 function showNameSelect(list){
-  const box = document.querySelector('.login-box');
-  box.innerHTML = `
-    <div class="login-logo">👤</div>
-    <div class="login-title" style="margin-bottom:6px">본인 이름을 선택해주세요</div>
-    <div class="login-sub">동일한 번호가 여러 명이에요</div>
-    ${list.map(p=>`<button onclick="selectPax('${p.phone}')"
-      style="display:block;width:100%;padding:13px;margin-bottom:8px;background:var(--blue-light);border:1.5px solid var(--blue);border-radius:8px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--navy)">
-      ${p.name} <span style="font-size:13px;color:var(--gray)">(${p.nick})</span>
-    </button>`).join('')}`;
+  // 기존 팝업 제거
+  const old = document.getElementById('_nameSelectModal');
+  if(old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = '_nameSelectModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:rgba(10,22,40,.7);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(6px)';
+
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:fadeInUp .25s ease">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:36px;margin-bottom:10px">👥</div>
+        <div style="font-size:17px;font-weight:900;color:#0f2044;margin-bottom:6px">본인을 선택해주세요</div>
+        <div style="font-size:13px;color:#94a3b8">동일한 번호로 등록된 분이 있어요</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${list.map(p=>`
+          <button onclick="selectPax('${p.phone}')"
+            style="width:100%;padding:16px;background:linear-gradient(135deg,#e8effe,#f0f4ff);border:2px solid #c8d8f8;border-radius:12px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;color:#0f2044;display:flex;align-items:center;gap:12px;transition:.15s"
+            onmouseover="this.style.background='linear-gradient(135deg,#1e5fd4,#0e8a7c)';this.style.color='#fff';this.style.borderColor='transparent'"
+            onmouseout="this.style.background='linear-gradient(135deg,#e8effe,#f0f4ff)';this.style.color='#0f2044';this.style.borderColor='#c8d8f8'">
+            <span style="font-size:22px">🙋</span>
+            <span>${p.name}</span>
+            <span style="margin-left:auto;font-size:12px;font-weight:600;opacity:.6">${p.nick}</span>
+          </button>`).join('')}
+      </div>
+      <div style="text-align:center;margin-top:16px">
+        <button onclick="document.getElementById('_nameSelectModal').remove()"
+          style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;font-family:inherit;padding:4px 12px">
+          ← 다시 입력
+        </button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
 }
 
 function selectPax(phone){
   const pax = PAX_DATA.find(p=>p.phone===phone);
   if(pax){
+    const modal = document.getElementById('_nameSelectModal');
+    if(modal) modal.remove();
     document.getElementById('loginScreen').classList.add('hidden');
     enterUserMode(pax);
   }
