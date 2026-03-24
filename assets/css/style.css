@@ -1192,7 +1192,7 @@ body.app-mode #appTabBar { display: flex; }
   position: fixed;
   top: 56px; bottom: 64px;
   left: 0; right: 0;
-  overflow: hidden;
+  overflow: clip;
 }
 body.app-mode #appScreens { display: block; }
 
@@ -1223,6 +1223,7 @@ body.app-mode #appScreens { display: block; }
   transform: translateX(0);
   opacity: 1;
   pointer-events: all;
+  z-index: 1;
 }
 
 /* ── 홈 스크린 카드들 ── */

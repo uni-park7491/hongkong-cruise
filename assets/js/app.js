@@ -115,6 +115,13 @@ function initAppMode(pax){
   document.querySelector('.hero').style.display = 'none';
   document.getElementById('mainWrap').style.display = 'none';
   document.getElementById('myDashboard').style.display = 'none';
+  // 앱 UI 명시적으로 표시
+  const appScreens = document.getElementById('appScreens');
+  const appTabBar = document.getElementById('appTabBar');
+  const appHeader = document.getElementById('appHeader');
+  if(appScreens){ appScreens.style.display = 'block'; appScreens.style.zIndex = '100'; }
+  if(appTabBar) appTabBar.style.display = 'flex';
+  if(appHeader) appHeader.style.display = 'flex';
 
   // 앱 헤더 날씨 연동
   const weatherEl = document.getElementById('weatherVal');
@@ -138,9 +145,11 @@ function initAppMode(pax){
   renderMyInfoScreen(pax);
   setTimeout(()=>renderTimeGreeting(pax), 100);
 
-  // 탭 초기화
-  switchTab('home');
-  screenHistory = ['home'];
+  // 탭 초기화 - DOM이 준비된 후 실행
+  requestAnimationFrame(function(){
+    switchTab('home');
+    screenHistory = ['home'];
+  });
 }
 
 function exitAppMode(){
@@ -156,6 +165,12 @@ function switchTab(tab){
   document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
   const activeTab = document.getElementById('tab-'+tab);
   if(activeTab) activeTab.classList.add('active');
+
+  // 모든 스크린 먼저 숨기기 (active 확실히 해제)
+  document.querySelectorAll('.app-screen').forEach(s => {
+    s.classList.remove('active','hidden-left','hidden-right');
+    if(s.id !== 'screen-'+tab) s.classList.add('hidden-right');
+  });
 
   // 스크린 전환 방향 결정
   const tabOrder = ['home','schedule','community','myinfo'];
