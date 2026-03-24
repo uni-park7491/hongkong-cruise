@@ -295,134 +295,101 @@ function showSeatMapModal(seat, flight){
   const row = parseInt(seat);
   const col = seat.replace(/[0-9]/g,'').toUpperCase();
 
-  // ── 기종별 좌석 배열 정의 ──
-  // OZ721 A321: 3-3 협동체 → A-B-C / H-J-K (D-E-F 없음)
-  // OZ746 A330: 2-4-2 광동체 → A-C / D-E-F-G / H-K
-  // YP801 B787: 3-3-3 광동체 → A-B-C / D-E-F / G-H-J
-
-  let layout, groups, colLabels, aircraftName;
-
-  if(flight === 'OZ721' || flight === 'YP801'){
-    if(flight === 'OZ721'){
-      // 아시아나 A321 협동체 3-3 (A-B-C / H-J-K)
-      layout = ['A','B','C','H','J','K'];
-      groups = [['A','B','C'],['H','J','K']];
-      aircraftName = 'A321 · 3-3 배열 (A-B-C / H-J-K)';
-    } else {
-      // 에어프레미아 B787-9 광동체 3-3-3 (A-B-C / D-E-F / G-H-J)
-      layout = ['A','B','C','D','E','F','G','H','J'];
-      groups = [['A','B','C'],['D','E','F'],['G','H','J']];
-      aircraftName = 'B787-9 · 3-3-3 배열 (A-B-C / D-E-F / G-H-J)';
-    }
+  let groups, aircraftName;
+  if(flight === 'OZ721'){
+    groups = [['A','B','C'],['H','J','K']];
+    aircraftName = 'A321 · 3-3 배열 (A-B-C / H-J-K)';
+  } else if(flight === 'YP801'){
+    groups = [['A','B','C'],['D','E','F'],['G','H','J']];
+    aircraftName = 'B787-9 · 3-3-3 배열 (A-B-C / D-E-F / G-H-J)';
   } else {
-    // 아시아나 A330 광동체 2-4-2 (A-C / D-E-F-G / H-K)
-    layout = ['A','C','D','E','F','G','H','K'];
     groups = [['A','C'],['D','E','F','G'],['H','K']];
     aircraftName = 'A330-300 · 2-4-2 배열 (A-C / D-E-F-G / H-K)';
   }
+  const layout = groups.flat();
 
-  // 위치 설명
-  function getSeatPos(col, groups){
-    const gi = groups.findIndex(g => g.includes(col));
+  function getSeatPos(c){
+    const gi = groups.findIndex(g=>g.includes(c));
     const g = groups[gi];
-    if(gi === 0){
-      if(g.indexOf(col) === 0) return '왼쪽 창가';
-      if(g.indexOf(col) === g.length-1) return '왼쪽 통로';
-      return '왼쪽 중간';
-    } else if(gi === groups.length-1){
-      if(g.indexOf(col) === 0) return '오른쪽 통로';
-      if(g.indexOf(col) === g.length-1) return '오른쪽 창가';
-      return '오른쪽 중간';
-    } else {
-      if(g.indexOf(col) === 0) return '가운데 (왼통로)';
-      if(g.indexOf(col) === g.length-1) return '가운데 (오통로)';
-      return '가운데';
-    }
+    const ci = g.indexOf(c);
+    if(gi===0) return ci===0?'왼쪽 창가':ci===g.length-1?'왼쪽 통로':'왼쪽 중간';
+    if(gi===groups.length-1) return ci===0?'오른쪽 통로':ci===g.length-1?'오른쪽 창가':'오른쪽 중간';
+    return ci===0?'가운데(왼통로)':ci===g.length-1?'가운데(오통로)':'가운데';
   }
-  const pos = getSeatPos(col, groups);
-  const zone = row <= 8 ? '앞쪽 (비즈니스)' : row <= 20 ? '이코노미 앞쪽' : row <= 30 ? '이코노미 중간' : '이코노미 뒤쪽';
+  const pos = getSeatPos(col);
+  const zone = row<=8?'앞쪽(비즈니스)':row<=20?'이코노미 앞':row<=30?'이코노미 중간':'이코노미 뒤';
 
-  // SVG 생성
-  const CELL = 20, GAP = 5, AISLE = 16, ROW_H = 26;
-  const startRow = Math.max(1, row - 5);
-  const endRow = row + 5;
-
-  // x 위치 계산
-  const xMap = {};
-  let x = 30;
-  groups.forEach((g, gi) => {
-    g.forEach(c => { xMap[c] = x; x += CELL + GAP; });
-    if(gi < groups.length - 1) x += AISLE - GAP;
+  // SVG
+  const CELL=20,GAP=5,AISLE=16,ROW_H=26;
+  const startRow=Math.max(1,row-5), endRow=row+5;
+  const xMap={};
+  let x=30;
+  groups.forEach((g,gi)=>{
+    g.forEach(c=>{xMap[c]=x; x+=CELL+GAP;});
+    if(gi<groups.length-1) x+=AISLE-GAP;
   });
-  const svgW = x + 8;
-  const svgH = (endRow - startRow + 1) * ROW_H + 32;
+  const svgW=x+8, svgH=(endRow-startRow+1)*ROW_H+32;
 
-  let svgContent = '';
-
-  // 통로 표시
-  let ax = 30;
-  groups.forEach((g, gi) => {
-    ax += g.length * (CELL + GAP);
-    if(gi < groups.length - 1){
-      svgContent += `<rect x="${ax}" y="22" width="${AISLE - GAP}" height="${svgH-30}" rx="2" fill="rgba(148,163,184,.12)"/>`;
-      ax += AISLE - GAP;
+  let svgC='';
+  let ax=30;
+  groups.forEach((g,gi)=>{
+    ax+=g.length*(CELL+GAP);
+    if(gi<groups.length-1){
+      svgC+=`<rect x="${ax}" y="22" width="${AISLE-GAP}" height="${svgH-30}" rx="2" fill="rgba(148,163,184,.12)"/>`;
+      ax+=AISLE-GAP;
     }
   });
-
-  // 열 레이블
-  layout.forEach(c => {
-    if(xMap[c] !== undefined)
-      svgContent += `<text x="${xMap[c]+CELL/2}" y="16" text-anchor="middle" font-size="9" fill="#64748b" font-weight="600">${c}</text>`;
+  layout.forEach(c=>{
+    if(xMap[c]!==undefined)
+      svgC+=`<text x="${xMap[c]+CELL/2}" y="16" text-anchor="middle" font-size="9" fill="#64748b" font-weight="600">${c}</text>`;
   });
-
-  // 좌석 렌더
-  for(let r = startRow; r <= endRow; r++){
-    const y = (r - startRow) * ROW_H + 22;
-    const isMyRow = r === row;
-    svgContent += `<text x="14" y="${y+CELL*0.72}" text-anchor="middle" font-size="9" fill="${isMyRow?'#ffca22':'#94a3b8'}" font-weight="${isMyRow?'bold':'normal'}">${r}</text>`;
-    layout.forEach(c => {
-      const cx = xMap[c];
-      if(cx === undefined) return;
-      const isMe = r === row && c === col;
-      const isBiz = r <= 8;
-      const fill = isMe ? '#ffca22' : (isBiz ? '#bfdbfe' : '#e8effe');
-      const stroke = isMe ? '#b45309' : '#c0cce0';
-      const sw = isMe ? 2 : 1;
-      svgContent += `<rect x="${cx}" y="${y}" width="${CELL}" height="${CELL-2}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
-      if(isMe) svgContent += `<text x="${cx+CELL/2}" y="${y+CELL*0.68}" text-anchor="middle" font-size="8" font-weight="bold" fill="#0a1628">${c}</text>`;
+  for(let r=startRow;r<=endRow;r++){
+    const y=(r-startRow)*ROW_H+22;
+    const isMyRow=r===row;
+    svgC+=`<text x="14" y="${y+CELL*0.72}" text-anchor="middle" font-size="9" fill="${isMyRow?'#ffca22':'#94a3b8'}" font-weight="${isMyRow?'bold':'normal'}">${r}</text>`;
+    layout.forEach(c=>{
+      const cx=xMap[c]; if(cx===undefined)return;
+      const isMe=r===row&&c===col;
+      const fill=isMe?'#ffca22':(r<=8?'#bfdbfe':'#e8effe');
+      const stroke=isMe?'#b45309':'#c0cce0';
+      svgC+=`<rect x="${cx}" y="${y}" width="${CELL}" height="${CELL-2}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="${isMe?2:1}"/>`;
+      if(isMe) svgC+=`<text x="${cx+CELL/2}" y="${y+CELL*0.68}" text-anchor="middle" font-size="8" font-weight="bold" fill="#0a1628">${c}</text>`;
     });
   }
+  const svg=`<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg"><rect width="${svgW}" height="${svgH}" fill="#f8faff" rx="10"/>${svgC}</svg>`;
 
-  const svgEl = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${svgW}" height="${svgH}" fill="#f8faff" rx="10"/>${svgContent}
-  </svg>`;
+  // 기존 모달 제거
+  const old = document.getElementById('_seatMapModal');
+  if(old) old.remove();
 
-  // 팝업
-  const overlay = document.getElementById('popupSectionOverlay');
-  const content = document.getElementById('popupSectionContent');
-  if(!overlay || !content) return;
-
-  content.innerHTML = `
-    <div style="padding:20px">
-      <div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.08em;margin-bottom:8px">✈ ${flight} · 좌석 위치</div>
+  // 새 모달 body에 직접 추가 (z-index 최상위)
+  const modal = document.createElement('div');
+  modal.id = '_seatMapModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:0';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px 20px 40px;box-shadow:0 -8px 40px rgba(0,0,0,.2)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:#1e5fd4;letter-spacing:.08em">✈ ${flight} · 좌석 위치</div>
+        <button onclick="document.getElementById('_seatMapModal').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#94a3b8;padding:0;line-height:1">×</button>
+      </div>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-        <div style="font-size:52px;font-weight:900;color:var(--navy);font-family:Barlow,sans-serif;line-height:1">${seat}</div>
+        <div style="font-size:56px;font-weight:900;color:#0f2044;font-family:Barlow,sans-serif;line-height:1">${seat}</div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <span style="background:var(--blue-light);color:var(--blue);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700">${pos}</span>
-          <span style="background:var(--teal-light);color:var(--teal2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700">${zone}</span>
+          <span style="background:#e8effe;color:#1e5fd4;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700">${pos}</span>
+          <span style="background:#e0f5f2;color:#0e8a7c;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700">${zone}</span>
         </div>
       </div>
       <div style="background:#f8faff;border-radius:12px;padding:14px;text-align:center;margin-bottom:12px">
-        <div style="font-size:11px;color:var(--gray2);margin-bottom:10px">🟨 = 내 좌석 · 주변 ±5열 표시</div>
-        ${svgEl}
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">🟨 = 내 좌석 · 앞뒤 ±5열 표시</div>
+        ${svg}
       </div>
-      <div style="font-size:11px;color:var(--gray2);text-align:center">${aircraftName}</div>
+      <div style="font-size:11px;color:#94a3b8;text-align:center">${aircraftName}</div>
     </div>`;
 
-  document.body.style.overflow = 'auto';
-  overlay.style.zIndex = '999999';
-  overlay.style.display = 'flex';
-  overlay.classList.add('show');
+  modal.addEventListener('click', e=>{
+    if(e.target===modal) modal.remove();
+  });
+  document.body.appendChild(modal);
 }
 
 

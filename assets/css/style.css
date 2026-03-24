@@ -1192,7 +1192,7 @@ body.app-mode #appTabBar { display: flex; }
   position: fixed;
   top: 56px; bottom: 64px;
   left: 0; right: 0;
-  overflow: clip;
+  overflow: visible;
 }
 body.app-mode #appScreens { display: block; }
 
