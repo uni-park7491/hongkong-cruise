@@ -9,27 +9,38 @@ let passportRevealed = false;
 
 
 async function fetchHKWeather(){
-  const el = document.getElementById('weatherVal');
-  if(!el) return;
   try {
-    // Open-Meteo API - 무료, API키 불필요 (홍콩 위도경도)
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=22.3193&longitude=114.1694&current=temperature_2m,weathercode,relative_humidity_2m&timezone=Asia/Hong_Kong');
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=22.3193&longitude=114.1694&current=temperature_2m,weathercode,relative_humidity_2m,precipitation&hourly=precipitation_probability&timezone=Asia/Hong_Kong&forecast_days=1');
     const data = await res.json();
     const temp = Math.round(data.current.temperature_2m);
     const code = data.current.weathercode;
     const humid = data.current.relative_humidity_2m;
     const icon = getWeatherIcon(code);
-    el.textContent = `${icon} ${temp}℃`;
-    el.title = `습도 ${humid}%`;
-    // 날씨 섹션 툴팁
-    const stat = document.getElementById('weatherStat');
-    if(stat){
-      stat.title = `습도 ${humid}% · 홍콩 현재 날씨`;
-      const lbl = stat.querySelector('.lbl');
-      if(lbl) lbl.textContent = '🇭🇰 홍콩 날씨';
-    }
+
+    // 향후 6시간 강수 확률 평균
+    const hIdx = new Date().getHours();
+    const probs = (data.hourly?.precipitation_probability||[]).slice(hIdx, hIdx+6);
+    const rainProb = probs.length ? Math.round(probs.reduce((a,b)=>a+b,0)/probs.length) : 0;
+    const rainTxt = rainProb >= 20 ? rainProb+'%' : '';
+
+    // 홈 앱 날씨카드
+    const ico = document.getElementById('appWeatherIco');
+    const tmpEl = document.getElementById('appWeatherTemp');
+    const descEl = document.getElementById('appWeatherDesc');
+    const rainEl = document.getElementById('appWeatherRain');
+    const badge = document.getElementById('appWeatherBadge');
+    if(ico) ico.textContent = icon;
+    if(tmpEl) tmpEl.textContent = temp+'℃';
+    if(descEl) descEl.textContent = '습도 '+humid+'%';
+    if(rainEl) rainEl.textContent = rainTxt ? '🌧 '+rainTxt : '';
+    if(badge) badge.textContent = icon+' '+temp+'℃';
+
+    // 구버전 호환
+    const el = document.getElementById('weatherVal');
+    if(el) el.textContent = icon+' '+temp+'℃';
   } catch(e) {
-    el.textContent = '🌤️ —';
+    const el = document.getElementById('weatherVal');
+    if(el) el.textContent = '🌤️ —';
   }
 }
 
@@ -280,3 +291,4 @@ function updatePassportMask(){
   numEl.textContent = passportRevealed ? numEl.dataset.real : numEl.dataset.masked;
   if(revBtn) revBtn.textContent = passportRevealed ? '🙈 숨기기' : '👁 보기';
 }
+

@@ -139,7 +139,7 @@ function listenMessages(){
   const { collection, query, orderBy, onSnapshot } = getFS();
   const q = query(collection(getDB(),'messages'), orderBy('ts','asc'));
   onSnapshot(q, snap=>{
-    const msgs = snap.docs.map(d=>d.data());
+    const msgs = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderMessages(msgs);
   });
 }

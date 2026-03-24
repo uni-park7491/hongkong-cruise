@@ -1,3 +1,103 @@
+
+// ─────────── AI 시간대별 인사말 ───────────
+function getTimeGreeting(pax){
+  const now = new Date();
+  const hk = new Date(now.toLocaleString('en-US',{timeZone:'Asia/Hong_Kong'}));
+  const h = hk.getHours();
+  const name = pax.nick || pax.name;
+
+  // 여행 기간 판단
+  const tripStart = new Date('2026-04-24T09:00:00+08:00');
+  const tripEnd   = new Date('2026-04-28T06:20:00+09:00');
+  const isTripDay = now >= tripStart && now <= tripEnd;
+
+  // 오늘 일정 찾기
+  const todayKey = `${hk.getMonth()+1}/${hk.getDate()}`;
+  const scheduleMap = {
+    '4/24': { title:'탑승 & 웰컴 나이트', events:['~16:00 홍콩 공항 도착','16~18시 크루즈 탑승 수속','21:00 🚢 크루즈 출항'] },
+    '4/25': { title:'메인 컨퍼런스 데이', events:['10:00 오프닝 세션','12:00 점심 식사','14:00 국가별 커뮤니티 회의','19:30 저녁 프로젝트 세션','22:00 글로벌 공연'] },
+    '4/26': { title:'하선 & 홍콩 시티투어', events:['09:00 크루즈 하선','종일 홍콩 1일 시티투어','투어 후 호텔 체크인'] },
+    '4/27': { title:'홍콩 자유 일정', events:['아침 호텔 조식','낮~저녁 자유 일정','22:30 홍콩 국제공항 출발'] },
+    '4/28': { title:'귀국', events:['01:40 ✈️ 아시아나 OZ746 출발','06:20 인천 T2 도착'] },
+  };
+  const todaySched = scheduleMap[todayKey];
+
+  let emoji = '👋';
+  let greeting = '';
+  let subMsg = '';
+
+  if(isTripDay && todaySched){
+    const eventsText = todaySched.events.join(' · ');
+    if(h < 7){
+      emoji = '🌙';
+      greeting = `${name}님, 새벽이네요!`;
+      subMsg = `오늘은 <strong>${todaySched.title}</strong> 날이에요.<br>${eventsText}`;
+    } else if(h < 12){
+      emoji = '🌅';
+      greeting = `좋은 아침이에요, ${name}님!`;
+      subMsg = `오늘 일정: <strong>${todaySched.title}</strong><br>${eventsText}`;
+    } else if(h < 14){
+      emoji = '☀️';
+      greeting = `${name}님, 점심 시간이에요!`;
+      subMsg = `오늘은 <strong>${todaySched.title}</strong> 일정입니다.<br>${eventsText}`;
+    } else if(h < 18){
+      emoji = '🌤️';
+      greeting = `${name}님, 오후도 파이팅!`;
+      subMsg = `오늘 남은 일정: <strong>${todaySched.title}</strong><br>${eventsText}`;
+    } else if(h < 22){
+      emoji = '🌆';
+      greeting = `${name}님, 즐거운 저녁이에요!`;
+      subMsg = `오늘 하루 <strong>${todaySched.title}</strong> 어떠셨나요? 😊`;
+    } else {
+      emoji = '🌙';
+      greeting = `${name}님, 오늘 하루 수고하셨어요!`;
+      subMsg = `편안한 밤 되세요. 내일도 좋은 일정이 기다리고 있어요 ✨`;
+    }
+  } else {
+    // 여행 전/후
+    const diff = Math.ceil((tripStart - now) / 86400000);
+    if(diff > 0){
+      if(h < 12){
+        emoji = '🌅';
+        greeting = `좋은 아침이에요, ${name}님!`;
+        subMsg = `홍콩 크루즈까지 <strong>D-${diff}</strong>! 준비 잘 되고 있나요? 🚢`;
+      } else if(h < 18){
+        emoji = '☀️';
+        greeting = `안녕하세요, ${name}님!`;
+        subMsg = `출발까지 <strong>${diff}일</strong> 남았어요. 설레지 않나요? ✈️`;
+      } else if(h < 22){
+        emoji = '🌆';
+        greeting = `${name}님, 저녁 잘 드셨어요?`;
+        subMsg = `홍콩 크루즈 <strong>D-${diff}</strong>! 오늘 준비물 체크해보셨나요? ✅`;
+      } else {
+        emoji = '🌙';
+        greeting = `${name}님, 좋은 밤이에요!`;
+        subMsg = `내일도 크루즈 준비 파이팅! 🚢 설레는 꿈 꾸세요 ✨`;
+      }
+    } else {
+      emoji = '🎉';
+      greeting = `${name}님, 홍콩 크루즈 어떠셨나요?`;
+      subMsg = `멋진 연수였기를 바라요! 다음에 또 함께해요 😊`;
+    }
+  }
+
+  return { emoji, greeting, subMsg };
+}
+
+function renderTimeGreeting(pax){
+  const el = document.getElementById('aiGreeting');
+  if(!el || !pax) return;
+  const { emoji, greeting, subMsg } = getTimeGreeting(pax);
+  el.innerHTML = \`
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:rgba(255,255,255,.08);border-radius:12px;margin:12px 0 0;border:1px solid rgba(255,255,255,.12)">
+      <div style="font-size:24px;flex-shrink:0;margin-top:2px">\${emoji}</div>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">\${greeting}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6">\${subMsg}</div>
+      </div>
+    </div>
+  \`;
+}
 // =============================================
 // app.js - 앱 코어 (탭, 화면 전환, 네비게이션)
 // =============================================
@@ -36,6 +136,7 @@ function initAppMode(pax){
 
   // 내정보 스크린 렌더
   renderMyInfoScreen(pax);
+  setTimeout(()=>renderTimeGreeting(pax), 100);
 
   // 탭 초기화
   switchTab('home');
@@ -361,17 +462,7 @@ function renderMyInfoScreen(pax){
     ${passportHtml}
     <div class="info-menu-item" onclick="appNav('flights')">
       <div class="info-menu-ico" style="background:#e8effe">✈️</div>
-      <div><div class="info-menu-title">내 탑승권</div><div class="info-menu-sub">가는편 · 귀국편 좌석 확인</div></div>
-      <span class="info-menu-arrow">›</span>
-    </div>
-    <div class="info-menu-item" onclick="openMemberBp(appUser.phone)">
-      <div class="info-menu-ico" style="background:#dcf5f0">🎫</div>
-      <div><div class="info-menu-title">탑승권 이미지</div><div class="info-menu-sub">탑승권 저장하기</div></div>
-      <span class="info-menu-arrow">›</span>
-    </div>
-    <div class="info-menu-item" onclick="appNav('checklist')">
-      <div class="info-menu-ico" style="background:#fdf6e3">✅</div>
-      <div><div class="info-menu-title">준비물 체크리스트</div><div class="info-menu-sub">출발 전 체크사항</div></div>
+      <div><div class="info-menu-title">내 항공편</div><div class="info-menu-sub">가는편 · 귀국편 · 좌석 확인</div></div>
       <span class="info-menu-arrow">›</span>
     </div>
     <div class="info-menu-item" onclick="toggleDarkMode()">
