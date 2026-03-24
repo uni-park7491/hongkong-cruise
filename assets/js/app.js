@@ -468,10 +468,11 @@ function renderMyInfoScreen(pax){
   content.innerHTML = `
     <div class="info-profile-card">
       <div class="info-avatar">✈️</div>
-      <div>
-        <div style="font-size:18px;font-weight:800">${pax.name}</div>
-        <div style="font-size:13px;opacity:.8;margin-top:2px">닉네임: ${pax.nick}</div>
-        <div style="font-size:11px;opacity:.6;margin-top:1px">${pax.flight1 === 'OZ721' ? '아시아나항공' : '에어프레미아'} 탑승</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="font-size:20px;font-weight:900">${pax.name}</div>
+          <div style="background:rgba(255,202,34,.25);border:1px solid rgba(255,202,34,.5);border-radius:20px;padding:3px 12px;font-size:13px;font-weight:700;color:#ffca22">${pax.nick}</div>
+        </div>
       </div>
     </div>
     ${passportHtml}
@@ -499,55 +500,108 @@ function renderMyInfoScreen(pax){
 function renderAppFlights(content){
   if(!appUser) return;
   const p = appUser;
-  content.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div style="background:var(--white);border-radius:16px;padding:20px;box-shadow:var(--shadow)">
-        <div style="font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.08em;margin-bottom:12px">✈ 가는 편 (04.24)</div>
-        <div style="font-size:28px;font-weight:900;color:var(--navy);font-family:Barlow,sans-serif;margin-bottom:14px">ICN → HKG</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-          <div style="background:var(--bg);border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--gray2);letter-spacing:.06em;margin-bottom:4px">항공편</div>
-            <div style="font-size:16px;font-weight:800;color:var(--navy)">${p.flight1}</div>
-          </div>
-          <div style="background:var(--bg);border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--gray2);letter-spacing:.06em;margin-bottom:4px">출발</div>
-            <div style="font-size:16px;font-weight:800;color:var(--navy)">${p.dep1.split(' ').pop()}</div>
-          </div>
-          <div style="background:var(--bg);border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--gray2);letter-spacing:.06em;margin-bottom:4px">터미널</div>
-            <div style="font-size:16px;font-weight:800;color:var(--navy)">${p.flight1==='OZ721'?'T2':'T1'}</div>
-          </div>
-          <div style="background:var(--teal);border-radius:10px;padding:12px;cursor:pointer" onclick="showSeatMap(appUser.seat1, appUser.flight1)">
-            <div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.06em;margin-bottom:4px">내 좌석 👆</div>
-            <div style="font-size:28px;font-weight:900;color:#fff;font-family:Barlow,sans-serif">${p.seat1}</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">위치 보기</div>
+  const airline1 = p.flight1==='OZ721' ? '아시아나항공 A330-300' : '에어프레미아 B787-9';
+  const airline2 = 'OZ746 · 아시아나항공 A330-300';
+
+  function seatCard(seat, flight, color){
+    const row = parseInt(seat);
+    const col = seat.replace(/[0-9]/g,'').toUpperCase();
+    // 아시아나 A330: A-B-C / D-E-F / H-J-K (3-3-3), 에어프레미아 B787: A-B-C / D-E-F / G-H-J (3-3-3)
+    const isAsiana = flight.includes('OZ');
+    const cols = isAsiana ? ['A','B','C','D','E','F','H','J','K'] : ['A','B','C','D','E','F','G','H','J'];
+    let pos = '';
+    if(isAsiana){
+      if(col==='A') pos='왼쪽 창가';
+      else if(col==='B') pos='왼쪽 중간';
+      else if(col==='C') pos='왼쪽 통로';
+      else if(col==='D') pos='가운데 통로';
+      else if(col==='E') pos='가운데 중간';
+      else if(col==='F') pos='가운데 통로';
+      else if(col==='H') pos='오른쪽 통로';
+      else if(col==='J') pos='오른쪽 중간';
+      else if(col==='K') pos='오른쪽 창가';
+    } else {
+      if(col==='A') pos='왼쪽 창가';
+      else if(col==='B') pos='왼쪽 중간';
+      else if(col==='C') pos='왼쪽 통로';
+      else if(col==='D') pos='가운데 통로';
+      else if(col==='E') pos='가운데 중간';
+      else if(col==='F') pos='가운데 통로';
+      else if(col==='G') pos='오른쪽 통로';
+      else if(col==='H') pos='오른쪽 중간';
+      else if(col==='J') pos='오른쪽 창가';
+    }
+    const zone = row<=15?'앞쪽':row<=25?'중간':'뒤쪽';
+    return `<div style="background:${color};border-radius:12px;padding:14px;cursor:pointer;grid-column:span 2"
+      onclick="showSeatMapModal('${seat}','${flight}')">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:4px">내 좌석 · 탭하면 위치 확인</div>
+          <div style="font-size:38px;font-weight:900;color:#fff;font-family:Barlow,sans-serif;line-height:1">${seat}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:rgba(255,255,255,.8);margin-bottom:4px">${zone} · ${pos}</div>
+          <div style="background:rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:#fff">
+            🗺 좌석 배치도 보기
           </div>
         </div>
-        <button onclick="memberBpTab='go';openMemberBp(appUser.phone)" style="width:100%;background:var(--teal);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">🎫 탑승권 보기</button>
+      </div>
+    </div>`;
+  }
+
+  content.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="background:var(--white);border-radius:16px;padding:20px;box-shadow:var(--shadow)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.06em">✈ 가는 편</div>
+          <div style="font-size:11px;color:var(--gray2)">04.24 (금)</div>
+        </div>
+        <div style="font-size:11px;color:var(--gray2);margin-bottom:14px">${airline1}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">항공편</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">${p.flight1}</div>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">출발 시각</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">${p.dep1.split(' ').pop()}</div>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">인천 터미널</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">${p.flight1==='OZ721'?'T2':'T1'}</div>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">홍콩 도착</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">${p.arr1.split(' ').pop()}</div>
+          </div>
+          ${seatCard(p.seat1, p.flight1, 'linear-gradient(135deg,#0e8a7c,#1e5fd4)')}
+        </div>
       </div>
       <div style="background:var(--white);border-radius:16px;padding:20px;box-shadow:var(--shadow)">
-        <div style="font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.08em;margin-bottom:12px">✈ 귀국 편 (04.28)</div>
-        <div style="font-size:28px;font-weight:900;color:var(--navy);font-family:Barlow,sans-serif;margin-bottom:14px">HKG → ICN</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-          <div style="background:var(--bg);border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--gray2);letter-spacing:.06em;margin-bottom:4px">항공편</div>
-            <div style="font-size:16px;font-weight:800;color:var(--navy)">${p.flight2}</div>
-          </div>
-          <div style="background:var(--bg);border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--gray2);letter-spacing:.06em;margin-bottom:4px">출발</div>
-            <div style="font-size:16px;font-weight:800;color:var(--navy)">${p.dep2.split(' ').pop()}</div>
-          </div>
-          <div style="background:var(--bg);border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--gray2);letter-spacing:.06em;margin-bottom:4px">터미널</div>
-            <div style="font-size:16px;font-weight:800;color:var(--navy)">T1 (홍콩)</div>
-          </div>
-          <div style="background:var(--blue);border-radius:10px;padding:12px;cursor:pointer" onclick="showSeatMap(appUser.seat2,'OZ746')">
-            <div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.06em;margin-bottom:4px">내 좌석 👆</div>
-            <div style="font-size:28px;font-weight:900;color:#fff;font-family:Barlow,sans-serif">${p.seat2}</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">위치 보기</div>
-          </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.06em">✈ 귀국 편</div>
+          <div style="font-size:11px;color:var(--gray2)">04.28 (화) 새벽</div>
         </div>
-        <button onclick="memberBpTab='return';openMemberBp(appUser.phone)" style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">🎫 탑승권 보기</button>
+        <div style="font-size:11px;color:var(--gray2);margin-bottom:14px">${airline2}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">항공편</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">${p.flight2}</div>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">출발 시각</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">${p.dep2.split(' ').pop()}</div>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">홍콩 터미널</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">T1</div>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:var(--gray2);margin-bottom:4px">인천 도착</div>
+            <div style="font-size:18px;font-weight:800;color:var(--navy)">${p.arr2.split(' ').pop()}</div>
+          </div>
+          ${seatCard(p.seat2, p.flight2, 'linear-gradient(135deg,#002868,#1e5fd4)')}
+        </div>
       </div>
     </div>`;
 }

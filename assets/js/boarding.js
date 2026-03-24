@@ -284,101 +284,147 @@ function renderBpAccordion(){
   }
 }
 
-function showSeatMap(seat, flight){
+
+// ─────────────────────────────────────────────
+// 항공기 좌석 배치도 (실제 기종 기반 SVG)
+// 아시아나 A330-300: 3-3-3 (A-B-C / D-E-F / H-J-K), 약 40열
+// 에어프레미아 B787-9: 3-3-3 (A-B-C / D-E-F / G-H-J), 약 35열
+// ─────────────────────────────────────────────
+function showSeatMapModal(seat, flight){
   if(!seat && appUser){ seat = appUser.seat1; flight = appUser.flight1; }
-  // 좌석 파싱 (예: 32A, 26C)
   const row = parseInt(seat);
   const col = seat.replace(/[0-9]/g,'').toUpperCase();
-  // 아시아나 OZ721/OZ746 좌석 배치 (이코노미: A B C _ D E F K H J K)
-  // 실제 배치: ABC / DEFHJ / K 혹은 간략히 ABC / DEF / HJK
-  const cols = ['A','B','C','D','E','F','G','H','J','K'];
-  const colLabels = ['A','B','C','','D','E','F','','H','J','K'];
-  // 어느 구역인지
-  let zone = '';
-  if(row <= 20) zone = '앞쪽';
-  else if(row <= 30) zone = '중간';
-  else if(row <= 40) zone = '뒤쪽';
-  else zone = '맨 뒤';
 
-  let colPos = '';
-  if(['A'].includes(col)) colPos = '왼쪽 창가';
-  else if(['B'].includes(col)) colPos = '왼쪽 중간';
-  else if(['C'].includes(col)) colPos = '왼쪽 통로';
-  else if(['D'].includes(col)) colPos = '오른쪽 통로';
-  else if(['E'].includes(col)) colPos = '오른쪽 중간';
-  else if(['F'].includes(col)) colPos = '오른쪽 통로';
-  else if(['H','J'].includes(col)) colPos = '오른쪽 중간';
-  else if(['K'].includes(col)) colPos = '오른쪽 창가';
-  else colPos = '중간';
+  // ── 기종별 좌석 배열 정의 ──
+  // OZ721 A321: 3-3 협동체 → A-B-C / H-J-K (D-E-F 없음)
+  // OZ746 A330: 2-4-2 광동체 → A-C / D-E-F-G / H-K
+  // YP801 B787: 3-3-3 광동체 → A-B-C / D-E-F / G-H-J
 
-  // 미니 좌석도 SVG 생성 (25~45열 표시, 내 좌석 강조)
-  let rows = '';
-  const startRow = Math.max(1, row - 5);
-  const endRow = row + 5;
-  const seatCols = ['A','B','C','D','E','F','H','J','K'];
-  const xMap = {A:5,B:22,C:39,D:62,E:79,F:96,H:119,J:136,K:153};
-  const W = 174, H_ROW = 14, PADDING = 8;
+  let layout, groups, colLabels, aircraftName;
 
-  for(let r = startRow; r <= endRow; r++){
-    const y = (r - startRow) * H_ROW + PADDING;
-    seatCols.forEach(c => {
-      const x = xMap[c];
-      const isMine = r === row && c === col;
-      const fill = isMine ? '#ffca22' : (r % 2 === 0 ? '#e8effe' : '#f0f4ff');
-      const stroke = isMine ? '#d4a017' : '#c8d0e0';
-      rows += `<rect x="${x}" y="${y}" width="12" height="11" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
-      if(isMine) rows += `<text x="${x+6}" y="${y+8.5}" text-anchor="middle" font-size="6" font-weight="bold" fill="#0a1628">${c}</text>`;
-    });
-    rows += `<text x="${W/2}" y="${(r-startRow)*H_ROW+PADDING+8}" text-anchor="middle" font-size="7" fill="#94a3b8">${r}</text>`;
+  if(flight === 'OZ721' || flight === 'YP801'){
+    if(flight === 'OZ721'){
+      // 아시아나 A321 협동체 3-3 (A-B-C / H-J-K)
+      layout = ['A','B','C','H','J','K'];
+      groups = [['A','B','C'],['H','J','K']];
+      aircraftName = 'A321 · 3-3 배열 (A-B-C / H-J-K)';
+    } else {
+      // 에어프레미아 B787-9 광동체 3-3-3 (A-B-C / D-E-F / G-H-J)
+      layout = ['A','B','C','D','E','F','G','H','J'];
+      groups = [['A','B','C'],['D','E','F'],['G','H','J']];
+      aircraftName = 'B787-9 · 3-3-3 배열 (A-B-C / D-E-F / G-H-J)';
+    }
+  } else {
+    // 아시아나 A330 광동체 2-4-2 (A-C / D-E-F-G / H-K)
+    layout = ['A','C','D','E','F','G','H','K'];
+    groups = [['A','C'],['D','E','F','G'],['H','K']];
+    aircraftName = 'A330-300 · 2-4-2 배열 (A-C / D-E-F-G / H-K)';
   }
 
-  const svgH = (endRow - startRow + 1) * H_ROW + PADDING * 2;
-  const svg = `<svg width="${W}" height="${svgH}" viewBox="0 0 ${W} ${svgH}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="${W}" height="${svgH}" fill="#f8faff" rx="8"/>
-    <!-- 통로 표시 -->
-    <rect x="52" y="0" width="8" height="${svgH}" fill="rgba(148,163,184,.1)"/>
-    <rect x="111" y="0" width="6" height="${svgH}" fill="rgba(148,163,184,.1)"/>
-    ${rows}
-    <!-- 열 레이블 -->
-    <text x="11" y="6" text-anchor="middle" font-size="6" fill="#64748b">A</text>
-    <text x="28" y="6" text-anchor="middle" font-size="6" fill="#64748b">B</text>
-    <text x="45" y="6" text-anchor="middle" font-size="6" fill="#64748b">C</text>
-    <text x="68" y="6" text-anchor="middle" font-size="6" fill="#64748b">D</text>
-    <text x="85" y="6" text-anchor="middle" font-size="6" fill="#64748b">E</text>
-    <text x="102" y="6" text-anchor="middle" font-size="6" fill="#64748b">F</text>
-    <text x="125" y="6" text-anchor="middle" font-size="6" fill="#64748b">H</text>
-    <text x="142" y="6" text-anchor="middle" font-size="6" fill="#64748b">J</text>
-    <text x="159" y="6" text-anchor="middle" font-size="6" fill="#64748b">K</text>
+  // 위치 설명
+  function getSeatPos(col, groups){
+    const gi = groups.findIndex(g => g.includes(col));
+    const g = groups[gi];
+    if(gi === 0){
+      if(g.indexOf(col) === 0) return '왼쪽 창가';
+      if(g.indexOf(col) === g.length-1) return '왼쪽 통로';
+      return '왼쪽 중간';
+    } else if(gi === groups.length-1){
+      if(g.indexOf(col) === 0) return '오른쪽 통로';
+      if(g.indexOf(col) === g.length-1) return '오른쪽 창가';
+      return '오른쪽 중간';
+    } else {
+      if(g.indexOf(col) === 0) return '가운데 (왼통로)';
+      if(g.indexOf(col) === g.length-1) return '가운데 (오통로)';
+      return '가운데';
+    }
+  }
+  const pos = getSeatPos(col, groups);
+  const zone = row <= 8 ? '앞쪽 (비즈니스)' : row <= 20 ? '이코노미 앞쪽' : row <= 30 ? '이코노미 중간' : '이코노미 뒤쪽';
+
+  // SVG 생성
+  const CELL = 20, GAP = 5, AISLE = 16, ROW_H = 26;
+  const startRow = Math.max(1, row - 5);
+  const endRow = row + 5;
+
+  // x 위치 계산
+  const xMap = {};
+  let x = 30;
+  groups.forEach((g, gi) => {
+    g.forEach(c => { xMap[c] = x; x += CELL + GAP; });
+    if(gi < groups.length - 1) x += AISLE - GAP;
+  });
+  const svgW = x + 8;
+  const svgH = (endRow - startRow + 1) * ROW_H + 32;
+
+  let svgContent = '';
+
+  // 통로 표시
+  let ax = 30;
+  groups.forEach((g, gi) => {
+    ax += g.length * (CELL + GAP);
+    if(gi < groups.length - 1){
+      svgContent += `<rect x="${ax}" y="22" width="${AISLE - GAP}" height="${svgH-30}" rx="2" fill="rgba(148,163,184,.12)"/>`;
+      ax += AISLE - GAP;
+    }
+  });
+
+  // 열 레이블
+  layout.forEach(c => {
+    if(xMap[c] !== undefined)
+      svgContent += `<text x="${xMap[c]+CELL/2}" y="16" text-anchor="middle" font-size="9" fill="#64748b" font-weight="600">${c}</text>`;
+  });
+
+  // 좌석 렌더
+  for(let r = startRow; r <= endRow; r++){
+    const y = (r - startRow) * ROW_H + 22;
+    const isMyRow = r === row;
+    svgContent += `<text x="14" y="${y+CELL*0.72}" text-anchor="middle" font-size="9" fill="${isMyRow?'#ffca22':'#94a3b8'}" font-weight="${isMyRow?'bold':'normal'}">${r}</text>`;
+    layout.forEach(c => {
+      const cx = xMap[c];
+      if(cx === undefined) return;
+      const isMe = r === row && c === col;
+      const isBiz = r <= 8;
+      const fill = isMe ? '#ffca22' : (isBiz ? '#bfdbfe' : '#e8effe');
+      const stroke = isMe ? '#b45309' : '#c0cce0';
+      const sw = isMe ? 2 : 1;
+      svgContent += `<rect x="${cx}" y="${y}" width="${CELL}" height="${CELL-2}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+      if(isMe) svgContent += `<text x="${cx+CELL/2}" y="${y+CELL*0.68}" text-anchor="middle" font-size="8" font-weight="bold" fill="#0a1628">${c}</text>`;
+    });
+  }
+
+  const svgEl = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${svgW}" height="${svgH}" fill="#f8faff" rx="10"/>${svgContent}
   </svg>`;
 
-  // 간단한 alert 대신 기존 팝업 재활용
-  const content = document.getElementById('popupSectionContent');
+  // 팝업
   const overlay = document.getElementById('popupSectionOverlay');
-  if(!content || !overlay) return;
+  const content = document.getElementById('popupSectionContent');
+  if(!overlay || !content) return;
 
-  content.innerHTML =
-    '<div style="padding:20px">'
-    +'<div style="font-size:12px;color:var(--blue);font-weight:700;letter-spacing:.08em;margin-bottom:6px">✈ '+flight+' · 좌석 위치</div>'
-    +'<h2 style="font-family:Barlow,sans-serif;font-size:2rem;font-weight:900;color:var(--navy);margin-bottom:4px">'+seat+'</h2>'
-    +'<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">'
-    +'<span style="background:var(--blue-light);color:var(--blue);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700">'+zone+'</span>'
-    +'<span style="background:var(--teal-light);color:var(--teal2);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700">'+colPos+'</span>'
-    +'</div>'
-    +'<div style="background:#f8faff;border-radius:12px;padding:12px;text-align:center;margin-bottom:14px">'
-    +'<div style="font-size:11px;color:var(--gray2);margin-bottom:8px">노란색 ⬛ = 내 좌석</div>'
-    +svg
-    +'</div>'
-    +'<div style="background:var(--gold-light);border-left:3px solid var(--gold2);border-radius:8px;padding:10px 14px;font-size:13px;color:#5a3e0a">'
-    +'💡 '+row+'행 '+col+'열 · '+colPos+' 자리예요.'
-    +'</div>'
-    +'</div>';
+  content.innerHTML = `
+    <div style="padding:20px">
+      <div style="font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.08em;margin-bottom:8px">✈ ${flight} · 좌석 위치</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="font-size:52px;font-weight:900;color:var(--navy);font-family:Barlow,sans-serif;line-height:1">${seat}</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="background:var(--blue-light);color:var(--blue);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700">${pos}</span>
+          <span style="background:var(--teal-light);color:var(--teal2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:700">${zone}</span>
+        </div>
+      </div>
+      <div style="background:#f8faff;border-radius:12px;padding:14px;text-align:center;margin-bottom:12px">
+        <div style="font-size:11px;color:var(--gray2);margin-bottom:10px">🟨 = 내 좌석 · 주변 ±5열 표시</div>
+        ${svgEl}
+      </div>
+      <div style="font-size:11px;color:var(--gray2);text-align:center">${aircraftName}</div>
+    </div>`;
 
   document.body.style.overflow = 'auto';
-  overlay.style.position = 'fixed';
   overlay.style.zIndex = '999999';
   overlay.style.display = 'flex';
   overlay.classList.add('show');
 }
+
 
 function confirmCall(number){
   return confirm(`📞 ${number}\n\n통화를 연결하시겠습니까?`);

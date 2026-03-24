@@ -1715,3 +1715,37 @@ body.app-mode .my-flight-card {
   color: #0a1628 !important;
   font-weight: 800 !important;
 }
+/* ── 탑승권 아코디언 레이아웃 수정 ── */
+#bpAccordionContent {
+  font-size: 12px !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+#bpAccordionContent .az-main {
+  display: flex !important;
+  flex-direction: row !important;
+}
+#bpAccordionContent .az-section-left {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+#bpAccordionContent .az-section-right {
+  width: 130px !important;
+  flex-shrink: 0;
+}
+#bpAccordionContent .az-name-val {
+  font-size: 13px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#bpAccordionContent .az-route-code {
+  font-size: 22px !important;
+}
+#bpAccordionContent .az-boarding-box-val {
+  font-size: 20px !important;
+}
+#bpAccordionContent .az-right-seat-num {
+  font-size: 1.6rem !important;
+}
