@@ -532,8 +532,11 @@ function renderAppFlights(content){
       else if(col==='J') pos='오른쪽 창가';
     }
     const zone = row<=15?'앞쪽':row<=25?'중간':'뒤쪽';
+    const cardId = 'seatCard_' + seat + '_' + flight.replace(/[^a-zA-Z0-9]/g,'');
+    // 전역에 등록
+    window['openSeat_'+cardId] = function(){ showSeatMapModal(seat, flight); };
     return `<div style="background:${color};border-radius:12px;padding:14px;cursor:pointer;grid-column:span 2"
-      data-seat="${seat}" data-flight="${flight}" onclick="showSeatMapModal(this.dataset.seat,this.dataset.flight)">
+      onclick="window['openSeat_${cardId}']()" id="${cardId}">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:4px">내 좌석 · 탭하면 위치 확인</div>
@@ -671,7 +674,115 @@ function renderAppEmergency(content){
 
 function renderAppAttractions(content){
   const sec = document.getElementById('attractions');
-  if(sec){ const clone=sec.cloneNode(true); clone.style.boxShadow='none'; content.innerHTML=''; content.appendChild(clone); }
+  if(sec){
+    const clone=sec.cloneNode(true);
+    clone.style.boxShadow='none';
+    content.innerHTML='';
+    content.appendChild(clone);
+  }
+  // 관광지 투표 섹션 추가
+  const voteDiv = document.createElement('div');
+  voteDiv.style.cssText = 'margin-top:16px;background:var(--white);border-radius:16px;padding:18px;box-shadow:var(--shadow)';
+  voteDiv.innerHTML = renderAttractionVote();
+  content.appendChild(voteDiv);
+}
+
+function renderAttractionVote(){
+  const VOTE_KEY = 'attractionVotes';
+  const MY_VOTE_KEY = 'myAttractionVotes_' + (appUser ? appUser.phone : 'guest');
+  const attractions_list = [
+    {rank:1, name:'빅토리아 피크', emoji:'⛰️'},
+    {rank:2, name:'침사추이 워터프론트', emoji:'🌊'},
+    {rank:3, name:'심포니 오브 라이츠', emoji:'✨'},
+    {rank:4, name:'천단대불', emoji:'🙏'},
+    {rank:5, name:'옹핑 360 케이블카', emoji:'🚡'},
+    {rank:6, name:'템플스트리트 야시장', emoji:'🏮'},
+    {rank:7, name:'익청빌딩', emoji:'🏢'},
+    {rank:8, name:'스타페리', emoji:'⛴️'},
+    {rank:9, name:'란콰이퐁', emoji:'🍸'},
+    {rank:10, name:'몽콕 레이디스마켓', emoji:'🛍️'},
+    {rank:11, name:'홍콩 디즈니랜드', emoji:'🏰'},
+    {rank:12, name:'오션파크', emoji:'🎡'},
+    {rank:13, name:'센트럴 에스컬레이터', emoji:'🚶'},
+    {rank:14, name:'스카이100 전망대', emoji:'🏙️'},
+    {rank:15, name:'리펄스베이 & 틴하우사원', emoji:'🏖️'},
+  ];
+
+  // 투표 데이터 로드
+  let votes = {};
+  let myVotes = [];
+  try {
+    const stored = localStorage.getItem(VOTE_KEY);
+    if(stored) votes = JSON.parse(stored);
+    const myStored = localStorage.getItem(MY_VOTE_KEY);
+    if(myStored) myVotes = JSON.parse(myStored);
+  } catch(e){}
+
+  const maxVote = Math.max(1, ...Object.values(votes));
+  const totalVoters = new Set(Object.values(votes)).size || 1;
+
+  const items = attractions_list.map(a => {
+    const cnt = votes[a.rank] || 0;
+    const pct = Math.round(cnt / Math.max(1, Object.values(votes).reduce((s,v)=>s+v,0)) * 100) || 0;
+    const checked = myVotes.includes(a.rank);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <input type="checkbox" id="avote${a.rank}" ${checked?'checked':''} onchange="handleAttrVote(${a.rank},this.checked)"
+        style="width:20px;height:20px;cursor:pointer;accent-color:var(--blue);flex-shrink:0">
+      <label for="avote${a.rank}" style="flex:1;cursor:pointer;display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">${a.emoji}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--navy)">${a.rank}. ${a.name}</span>
+      </label>
+      <div style="text-align:right;min-width:60px">
+        <div style="font-size:12px;font-weight:800;color:var(--blue)">${cnt}표</div>
+        <div style="width:60px;height:4px;background:var(--border);border-radius:2px;margin-top:3px">
+          <div style="width:${pct}%;height:100%;background:var(--blue);border-radius:2px;transition:.3s"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div>
+    <div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:4px">🗳️ 어디를 가고싶나요?</div>
+    <div style="font-size:12px;color:var(--gray2);margin-bottom:14px">TOP 15 중에서 가고싶은 곳을 투표해 주세요 · 중복 선택 가능 · 항목당 1회</div>
+    ${items}
+    <div style="margin-top:12px;font-size:11px;color:var(--gray2);text-align:center">투표는 이 기기에 저장됩니다</div>
+  </div>`;
+}
+
+function handleAttrVote(rank, checked){
+  const VOTE_KEY = 'attractionVotes';
+  const MY_VOTE_KEY = 'myAttractionVotes_' + (appUser ? appUser.phone : 'guest');
+  let votes = {};
+  let myVotes = [];
+  try {
+    const s = localStorage.getItem(VOTE_KEY); if(s) votes=JSON.parse(s);
+    const m = localStorage.getItem(MY_VOTE_KEY); if(m) myVotes=JSON.parse(m);
+  } catch(e){}
+
+  if(checked){
+    votes[rank] = (votes[rank]||0) + 1;
+    if(!myVotes.includes(rank)) myVotes.push(rank);
+  } else {
+    votes[rank] = Math.max(0, (votes[rank]||1) - 1);
+    myVotes = myVotes.filter(r=>r!==rank);
+  }
+
+  try {
+    localStorage.setItem(VOTE_KEY, JSON.stringify(votes));
+    localStorage.setItem(MY_VOTE_KEY, JSON.stringify(myVotes));
+  } catch(e){}
+
+  // 투표수 즉시 반영
+  const cnt = votes[rank] || 0;
+  const totalVotes = Object.values(votes).reduce((s,v)=>s+v,0) || 1;
+  const pct = Math.round(cnt/totalVotes*100);
+  const row = document.getElementById('avote'+rank)?.closest('div[style*="border-bottom"]');
+  if(row){
+    const cntEl = row.querySelector('div[style*="font-weight:800"]');
+    const barEl = row.querySelector('div[style*="height:100%"]');
+    if(cntEl) cntEl.textContent = cnt+'표';
+    if(barEl) barEl.style.width = pct+'%';
+  }
 }
 
 function reanimateCards(screenEl){
