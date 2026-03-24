@@ -88,15 +88,15 @@ function renderTimeGreeting(pax){
   const el = document.getElementById('aiGreeting');
   if(!el || !pax) return;
   const { emoji, greeting, subMsg } = getTimeGreeting(pax);
-  el.innerHTML = \`
+  el.innerHTML = `
     <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:rgba(255,255,255,.08);border-radius:12px;margin:12px 0 0;border:1px solid rgba(255,255,255,.12)">
-      <div style="font-size:24px;flex-shrink:0;margin-top:2px">\${emoji}</div>
+      <div style="font-size:24px;flex-shrink:0;margin-top:2px">${emoji}</div>
       <div>
-        <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">\${greeting}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6">\${subMsg}</div>
+        <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px">${greeting}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6">${subMsg}</div>
       </div>
     </div>
-  \`;
+  `;
 }
 // =============================================
 // app.js - 앱 코어 (탭, 화면 전환, 네비게이션)
