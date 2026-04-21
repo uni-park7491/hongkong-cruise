@@ -1874,3 +1874,88 @@ body.app-mode .my-flight-card {
 .sched-badge-red { background:#fef2f2; border-left:3px solid #dc2626; padding:4px 8px; border-radius:0 6px 6px 0; }
 .sched-badge-yellow { background:#fffbeb; border-left:3px solid #d97706; padding:4px 8px; border-radius:0 6px 6px 0; }
 .sched-badge-blue { background:#eff6ff; border-left:3px solid #1e5fd4; padding:4px 8px; border-radius:0 6px 6px 0; }
+
+/* ── 탭바 아이콘만 ── */
+.tab-txt { display: none !important; }
+#appTabBar .app-tab {
+  flex-direction: column;
+  padding: 12px 0 10px !important;
+  gap: 0 !important;
+}
+#appTabBar .tab-ico {
+  font-size: 24px !important;
+  margin: 0 !important;
+  line-height: 1;
+}
+#appTabBar .app-tab.active .tab-ico {
+  filter: drop-shadow(0 2px 6px rgba(30,95,212,.5));
+}
+
+/* ── 탑승권 아코디언 완전 재설계 ── */
+#bpAccordionContent {
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+#bpAccordionContent .az-ticket-wrap {
+  padding: 0 !important;
+}
+/* 아코디언 내 탑승권 상하 레이아웃 */
+#bpAccordionContent .az-main {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+}
+#bpAccordionContent .az-section-left {
+  width: 100% !important;
+  padding: 16px !important;
+  border-right: none !important;
+  border-bottom: 2px dashed #dde1ea !important;
+  display: block !important;
+}
+#bpAccordionContent .az-barcode-wrap { display: none !important; }
+#bpAccordionContent .az-content { width: 100% !important; }
+
+/* 항공편명/날짜 크게 */
+#bpAccordionContent .az-name-label { font-size: 10px !important; color: #94a3b8 !important; }
+#bpAccordionContent .az-name-val { font-size: 20px !important; font-weight: 900 !important; color: #0f2044 !important; }
+#bpAccordionContent .az-route { justify-content: flex-start !important; gap: 12px !important; margin: 10px 0 !important; }
+#bpAccordionContent .az-route-code { font-size: 28px !important; font-weight: 900 !important; color: #0f2044 !important; }
+#bpAccordionContent .az-route-arrow { font-size: 18px !important; color: #1e5fd4 !important; }
+#bpAccordionContent .az-boxes { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+#bpAccordionContent .az-boarding-box {
+  background: #f0f4ff !important;
+  border: 1.5px solid #c8d8f8 !important;
+  border-radius: 10px !important;
+  padding: 10px 12px !important;
+}
+#bpAccordionContent .az-boarding-box-label { font-size: 10px !important; color: #64748b !important; margin-bottom: 3px !important; }
+#bpAccordionContent .az-boarding-box-val { font-size: 20px !important; font-weight: 900 !important; color: #0f2044 !important; line-height: 1 !important; }
+
+/* 우측 미니 티켓 */
+#bpAccordionContent .az-section-right {
+  width: 100% !important;
+  background: linear-gradient(135deg, #0a1628, #002868) !important;
+  padding: 16px !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+  position: static !important;
+}
+#bpAccordionContent .az-right-row { display: flex; flex-direction: column; gap: 2px; }
+#bpAccordionContent .az-right-label { font-size: 9px !important; color: rgba(255,255,255,.5) !important; letter-spacing: .06em !important; }
+#bpAccordionContent .az-right-val { font-size: 14px !important; font-weight: 800 !important; color: #fff !important; }
+#bpAccordionContent .az-right-title { grid-column: span 2; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.15); margin-bottom: 4px; }
+#bpAccordionContent .az-right-title span { font-size: 12px !important; font-weight: 800 !important; color: rgba(255,255,255,.7) !important; letter-spacing: .06em !important; }
+#bpAccordionContent .az-right-airline { display: none !important; }
+#bpAccordionContent .az-right-seat-box {
+  grid-column: span 2 !important;
+  margin-top: 8px;
+  background: rgba(255,202,34,.15) !important;
+  border: 1.5px solid rgba(255,202,34,.5) !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  text-align: center !important;
+}
+#bpAccordionContent .az-right-eco { font-size: 10px !important; color: rgba(255,255,255,.5) !important; margin-bottom: 4px !important; }
+#bpAccordionContent .az-right-seat-num { font-size: 2.2rem !important; font-weight: 900 !important; color: #ffca22 !important; font-family: Barlow, sans-serif !important; line-height: 1 !important; }

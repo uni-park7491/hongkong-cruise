@@ -530,3 +530,162 @@ function showHotelInfo(){
   modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
   document.body.appendChild(modal);
 }
+
+// ─────────────────────────────────────────────
+// 크루즈 승선 티켓 모달
+// ─────────────────────────────────────────────
+function showCruiseTicket(){
+  if(!appUser) return;
+  const p = appUser;
+  
+  // 승객 방번호/갑판/집합구역 (passport 기반)
+  // cabin, deck, muster는 data.js에서 가져옴
+  const cabin = p.cabin || '미정';
+  const deck = p.deck || '-';
+  const muster = p.muster || '-';
+  
+  const old = document.getElementById('_cruiseTicketModal');
+  if(old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = '_cruiseTicketModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(6px)';
+  
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding-bottom:40px">
+      <!-- 헤더 닫기 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0">
+        <div style="font-size:13px;font-weight:700;color:#64748b">🚢 크루즈 승선 티켓</div>
+        <button onclick="document.getElementById('_cruiseTicketModal').remove()"
+          style="background:none;border:none;font-size:26px;cursor:pointer;color:#94a3b8;line-height:1">×</button>
+      </div>
+      
+      <!-- 티켓 본체 -->
+      <div style="margin:12px 16px;border:1.5px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12)">
+        
+        <!-- 티켓 상단 헤더 (크루즈 로고 + 타이틀) -->
+        <div style="background:linear-gradient(135deg,#0a1628 0%,#002868 60%,#0e3070 100%);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:28px">⚓</div>
+            <div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.1em">ASTRO OCEAN CRUISE</div>
+              <div style="font-size:15px;font-weight:900;color:#fff;letter-spacing:.05em">PIANO LAND 鼓浪嶼</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.08em">SETSAIL PASS</div>
+            <div style="font-size:11px;font-weight:800;color:#f0cc6a;letter-spacing:.06em">"鼓浪嶼"號郵輪登船憑證</div>
+          </div>
+        </div>
+        
+        <!-- 승객 정보 -->
+        <div style="background:#fafbff;padding:16px 20px;border-bottom:2px dashed #e2e8f0">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:3px">姓名 Name</div>
+              <div style="font-size:13px;font-weight:900;color:#0f2044;line-height:1.2">${p.eng || p.name.toUpperCase()}</div>
+              <div style="font-size:16px;font-weight:900;color:#0f2044;margin-top:2px">${p.name}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:3px">船票認證碼 Ticket Code</div>
+              <div style="font-size:14px;font-weight:900;color:#0f2044">16 ${p.passport}</div>
+              <div style="background:repeating-linear-gradient(90deg,#0f2044 0,#0f2044 2px,transparent 2px,transparent 4px);height:28px;margin-top:6px;border-radius:2px;opacity:.7"></div>
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">預定編號 BookingNo.</div>
+            <div style="font-size:13px;font-weight:700;color:#374151">2026031105206</div>
+          </div>
+        </div>
+        
+        <!-- 선실 정보 (CABIN INFORMATION) - 핵심! -->
+        <div style="background:#fff;padding:16px 20px">
+          <div style="display:inline-block;background:#0a1628;color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;padding:4px 12px;border-radius:4px;margin-bottom:14px">
+            艙位訊息 CABIN INFORMATION
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 2px 1fr 2px 1fr;gap:0;background:#f0f4ff;border-radius:12px;overflow:hidden;border:1px solid #dde6fb">
+            <div style="padding:14px 12px;text-align:center">
+              <div style="font-size:10px;color:#64748b;margin-bottom:6px">船艙樓層<br>Deck</div>
+              <div style="font-size:36px;font-weight:900;color:#0a1628;font-family:Barlow,sans-serif;line-height:1">${deck}</div>
+            </div>
+            <div style="background:#dde6fb"></div>
+            <div style="padding:14px 12px;text-align:center">
+              <div style="font-size:10px;color:#64748b;margin-bottom:6px">房間號碼<br>Cabin No.</div>
+              <div style="font-size:36px;font-weight:900;color:#0a1628;font-family:Barlow,sans-serif;line-height:1">${cabin}</div>
+            </div>
+            <div style="background:#dde6fb"></div>
+            <div style="padding:14px 12px;text-align:center">
+              <div style="font-size:10px;color:#64748b;margin-bottom:6px">逃生集合區<br>Muster Station</div>
+              <div style="font-size:36px;font-weight:900;color:#dc2626;font-family:Barlow,sans-serif;line-height:1">${muster}</div>
+            </div>
+          </div>
+          
+          <!-- 선표 유형 / 분단호 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+            <div style="background:#f8faff;border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:3px">船票類型 Type</div>
+              <div style="font-size:14px;font-weight:700;color:#0f2044">團隊 / Group</div>
+            </div>
+            <div style="background:#f8faff;border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:3px">分團號 Group No.</div>
+              <div style="font-size:14px;font-weight:700;color:#0f2044">CNY</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 항선 정보 (ITINERARY INFORMATION) -->
+        <div style="background:#fafbff;padding:16px 20px;border-top:1px solid #e2e8f0">
+          <div style="display:inline-block;background:#0a1628;color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;padding:4px 12px;border-radius:4px;margin-bottom:12px">
+            航線訊息 ITINERARY INFORMATION
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">承運人/船名 Carrier/Ship</div>
+              <div style="font-size:13px;font-weight:700;color:#0f2044">星旅远洋邮轮<br>Astro Ocean Cruise</div>
+              <div style="font-size:12px;color:#64748b">/ 鼓浪屿号 PIANO LAND</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">航程號 Cruise No.</div>
+              <div style="font-size:14px;font-weight:800;color:#0f2044">PL02260424</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">啟航日期 SailingDate</div>
+              <div style="font-size:14px;font-weight:800;color:#dc2626">2026-04-24 21:00</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">始發港 Port of Dep.</div>
+              <div style="font-size:14px;font-weight:800;color:#0f2044">홍콩 HongKong</div>
+            </div>
+            <div style="grid-column:span 2">
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">航線 Itinerary</div>
+              <div style="font-size:13px;font-weight:700;color:#0f2044">홍콩 → 해상 유람 → 홍콩</div>
+              <div style="font-size:11px;color:#64748b">HongKong – Sea – HongKong</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 주의사항 -->
+        <div style="background:#fffbeb;padding:14px 20px;border-top:1px solid #fde68a">
+          <div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:8px">⚠️ 중요 안내 IMPORTANT INFORMATION</div>
+          <div style="font-size:11px;color:#78350f;line-height:1.7">
+            ● 본 승선 티켓은 승선 시 반드시 지참해야 합니다. 여권 원본과 함께 준비해주세요.<br>
+            ● 탑승 마감 60분 전까지 항구에 도착하여 수속을 완료하세요.<br>
+            ● 티켓의 성명과 여권 정보가 일치하는지 확인하세요.
+          </div>
+        </div>
+        
+        <!-- 하단 서비스 -->
+        <div style="background:#0a1628;padding:14px 20px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:9px;color:rgba(255,255,255,.4);margin-bottom:4px">服務熱線 Service Hotline</div>
+            <div style="font-size:14px;font-weight:900;color:#fff">400 711 1099</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.5)">(852) 6368 2771 <span style="color:rgba(255,255,255,.3)">HK</span></div>
+          </div>
+          <div style="font-size:9px;color:rgba(255,255,255,.3)">www.aocruise.com</div>
+        </div>
+      </div>
+    </div>`;
+  
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}

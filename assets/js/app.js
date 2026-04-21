@@ -392,20 +392,31 @@ function renderMemberListHTML(){
   return html;
 }
 
-function renderAppChat(){
-  const content = document.getElementById('appCommunityContent');
-  if(!content || content.dataset.loaded) return;
-  const secEl = document.getElementById('community');
-  if(secEl){
-    const clone = secEl.cloneNode(true);
-    clone.style.display = 'block';
-    clone.style.boxShadow = 'none';
-    clone.style.background = 'transparent';
-    clone.style.padding = '0';
-    content.innerHTML = '';
-    content.appendChild(clone);
-    content.dataset.loaded = '1';
-  }
+function renderAppChat(content){
+  if(!content) return;
+  // Firebase 커뮤니티 초기화
+  content.innerHTML = `
+    <div id="communityInner" style="min-height:60vh">
+      <div style="text-align:center;padding:40px 0;color:var(--gray2)">
+        <div style="font-size:32px;margin-bottom:8px">💬</div>
+        <div style="font-size:14px">로딩 중...</div>
+      </div>
+    </div>`;
+  
+  // Community 섹션의 내용을 가져와 삽입
+  setTimeout(function(){
+    const inner = document.getElementById('communityInner');
+    if(!inner) return;
+    const commEl = document.getElementById('community');
+    if(commEl){
+      const clone = commEl.cloneNode(true);
+      clone.id = 'communityClone_' + Date.now();
+      clone.style.cssText = 'box-shadow:none;background:transparent;padding:0;border-radius:0';
+      inner.innerHTML = '';
+      inner.appendChild(clone);
+    }
+    if(typeof initCommunity === 'function') initCommunity();
+  }, 100);
 }
 
 function renderMyInfoScreen(pax){
