@@ -71,8 +71,8 @@ function renderMemberBp(p){
     h += '<div class="az-route-arrow">&#x2192;</div>';
     h += '<div class="az-route-item"><div class="az-route-label">TO</div><div class="az-route-code">' + to + '</div></div></div>';
     h += '<div class="az-boxes">';
-    h += '<div class="az-boarding-box"><div class="az-boarding-box-label">BOARDING TIME</div><div class="az-boarding-box-val">' + boardingTime + '</div></div>';
-    h += '<div class="az-boarding-box" style="border-color:#c8102e"><div class="az-boarding-box-label" style="color:#c8102e">DEP. TIME</div><div class="az-boarding-box-val" style="color:#c8102e">' + depTime + '</div></div>';
+    h += '<div class="az-boarding-box" style="background:#0f2044;border-color:#0f2044"><div class="az-boarding-box-label" style="color:rgba(255,255,255,.65)">BOARDING TIME</div><div class="az-boarding-box-val" style="color:#fff;font-size:22px;font-weight:900;font-family:Barlow,sans-serif">' + boardingTime + '</div></div>';
+    h += '<div class="az-boarding-box" style="background:#c8102e;border-color:#c8102e"><div class="az-boarding-box-label" style="color:rgba(255,255,255,.7)">DEP. TIME</div><div class="az-boarding-box-val" style="color:#fff;font-size:22px;font-weight:900;font-family:Barlow,sans-serif">' + depTime + '</div></div>';
     h += '<div class="az-seat-box"><div class="az-seat-label">SEAT NO.</div><div class="az-seat-val">' + seat + '</div></div></div>';
     h += '<div class="az-zone-gate"><div class="az-zone">ZONE 3</div>';
     h += '<div style="font-size:9px;color:#888;margin-left:8px">TERMINAL ' + terminal + '</div></div></div>';
@@ -239,8 +239,8 @@ function renderBpAccordion(){
       +'<div class="az-route-row"><div class="az-route-item"><div class="az-route-label">FROM</div><div class="az-route-code">'+from+'</div></div>'
       +'<div class="az-route-arrow">&#8594;</div>'
       +'<div class="az-route-item"><div class="az-route-label">TO</div><div class="az-route-code">'+to+'</div></div></div>'
-      +'<div class="az-boxes"><div class="az-boarding-box"><div class="az-boarding-box-label">BOARDING TIME</div><div class="az-boarding-box-val">'+boardingTime+'</div></div>'
-      +'<div class="az-boarding-box" style="border-color:#c8102e"><div class="az-boarding-box-label" style="color:#c8102e">DEP. TIME</div><div class="az-boarding-box-val" style="color:#c8102e">'+depTime+'</div></div>'
+      +'<div class="az-boxes"><div class="az-boarding-box" style="background:#0f2044;border-color:#0f2044"><div class="az-boarding-box-label" style="font-size:10px;color:rgba(255,255,255,.65);letter-spacing:.06em">BOARDING TIME</div><div class="az-boarding-box-val" style="font-size:22px;font-weight:900;color:#fff;font-family:Barlow,sans-serif;line-height:1.1">'+boardingTime+'</div></div>'
+      +'<div class="az-boarding-box" style="background:#c8102e;border-color:#c8102e"><div class="az-boarding-box-label" style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.06em">DEP. TIME</div><div class="az-boarding-box-val" style="font-size:22px;font-weight:900;color:#fff;font-family:Barlow,sans-serif;line-height:1.1">'+depTime+'</div></div>'
       +'<div class="az-seat-box"><div class="az-seat-label">SEAT NO.</div><div class="az-seat-val">'+seat+'</div></div></div>'
       +'<div class="az-zone-gate"><div class="az-zone">ZONE 3</div><div style="font-size:9px;color:#888;margin-left:8px">TERMINAL '+terminal+'</div></div>'
       +'</div></div>'
