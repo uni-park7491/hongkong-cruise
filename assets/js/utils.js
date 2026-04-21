@@ -292,3 +292,241 @@ function updatePassportMask(){
   if(revBtn) revBtn.textContent = passportRevealed ? '🙈 숨기기' : '👁 보기';
 }
 
+
+// ─────────────────────────────────────────────
+// 금융 주의사항 모달
+// ─────────────────────────────────────────────
+function showFinanceWarning(){
+  const old = document.getElementById('_financeModal');
+  if(old) old.remove();
+  const modal = document.createElement('div');
+  modal.id = '_financeModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:24px 20px 40px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:16px;font-weight:900;color:#dc2626">⚠️ 금융 보안 주의사항</div>
+        <button onclick="document.getElementById('_financeModal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8">×</button>
+      </div>
+      <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;color:#dc2626;margin-bottom:6px">🚨 홍콩 현지 최신 사기 수법</div>
+        <div style="font-size:12px;color:#7f1d1d;line-height:1.7">
+          홍콩 경찰은 2025~26년 저금리 대출을 미끼로 암호화폐 보증금을 요구하는 사기를 대대적으로 단속 중입니다. 은행 직원을 사칭해 가짜 사무실로 유인하는 사례가 급증하고 있어요.
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:#fff7ed;border-left:4px solid #f97316;border-radius:0 10px 10px 0;padding:12px">
+          <div style="font-size:12px;font-weight:800;color:#c2410c;margin-bottom:4px">📱 가짜 앱 & 피싱 주의</div>
+          <div style="font-size:12px;color:#431407;line-height:1.6">TokenPocket, WalletConnect 등을 사칭한 가짜 앱이 유포 중입니다. 반드시 공식 앱스토어에서만 다운로드하세요. APK 직접 설치는 절대 금지.</div>
+        </div>
+        <div style="background:#fff7ed;border-left:4px solid #f97316;border-radius:0 10px 10px 0;padding:12px">
+          <div style="font-size:12px;font-weight:800;color:#c2410c;margin-bottom:4px">🔑 시드구문·개인키 절대 비공개</div>
+          <div style="font-size:12px;color:#431407;line-height:1.6">지갑 복구를 도와준다며 시드 구문(12~24단어)이나 개인키를 요구하면 100% 사기입니다. 어떤 상황에서도 공유하지 마세요.</div>
+        </div>
+        <div style="background:#fff7ed;border-left:4px solid #f97316;border-radius:0 10px 10px 0;padding:12px">
+          <div style="font-size:12px;font-weight:800;color:#c2410c;margin-bottom:4px">📷 QR코드 스캔 주의 (퀴싱)</div>
+          <div style="font-size:12px;color:#431407;line-height:1.6">길거리·식당의 QR코드가 가짜일 수 있습니다. QR 스티커가 덧붙여져 있거나 출처 불명의 QR은 절대 스캔하지 마세요. 전체 온라인 사기의 20%가 QR 피싱입니다.</div>
+        </div>
+        <div style="background:#fff7ed;border-left:4px solid #f97316;border-radius:0 10px 10px 0;padding:12px">
+          <div style="font-size:12px;font-weight:800;color:#c2410c;margin-bottom:4px">💸 주소 중독 공격 (Address Poisoning)</div>
+          <div style="font-size:12px;color:#431407;line-height:1.6">소액 코인을 먼저 보내 거래 내역에 가짜 주소를 심는 수법입니다. 항상 전체 지갑 주소를 처음부터 끝까지 확인하세요.</div>
+        </div>
+        <div style="background:#fff7ed;border-left:4px solid #f97316;border-radius:0 10px 10px 0;padding:12px">
+          <div style="font-size:12px;font-weight:800;color:#c2410c;margin-bottom:4px">🤝 오프라인 사기 주의</div>
+          <div style="font-size:12px;color:#431407;line-height:1.6">2023년 로마 조직범죄단이 트러스트월렛 사용자를 대면으로 접근해 $400만을 탈취한 사례처럼, 현지에서 낯선 사람의 도움이나 투자 제안에 각별히 주의하세요.</div>
+        </div>
+        <div style="background:#fef2f2;border-radius:10px;padding:12px;margin-top:4px">
+          <div style="font-size:12px;font-weight:800;color:#dc2626;margin-bottom:6px">✅ 안전 수칙 체크리스트</div>
+          <div style="font-size:12px;color:#7f1d1d;line-height:1.8">
+            ☐ 공식 앱 외 설치 안 함<br>
+            ☐ 시드구문 절대 공유 안 함<br>
+            ☐ 모르는 QR코드 스캔 안 함<br>
+            ☐ 송금 전 주소 전체 확인<br>
+            ☐ 투자 권유·고수익 제안 즉시 거절<br>
+            ☐ 공공 WiFi에서 지갑 접속 안 함
+          </div>
+        </div>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+// ─────────────────────────────────────────────
+// 주차 정보 모달
+// ─────────────────────────────────────────────
+function showParkingInfo(){
+  const old = document.getElementById('_parkingModal');
+  if(old) old.remove();
+  const modal = document.createElement('div');
+  modal.id = '_parkingModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:24px 20px 40px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:16px;font-weight:900;color:#0f2044">🅿️ 인천공항 주차 가이드</div>
+        <button onclick="document.getElementById('_parkingModal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8">×</button>
+      </div>
+
+      <!-- 실시간 주차 현황 링크 -->
+      <a href="https://www.airport.kr/ap_ko/570/subview.do" target="_blank"
+        style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1e5fd4,#0e8a7c);border-radius:12px;padding:14px 16px;margin-bottom:14px;text-decoration:none">
+        <div>
+          <div style="font-size:13px;font-weight:800;color:#fff">📡 실시간 주차 가능 대수 확인</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px">인천공항 공식 사이트 → 탭하면 이동</div>
+        </div>
+        <span style="font-size:20px">›</span>
+      </a>
+
+      <!-- T1 -->
+      <div style="background:#f0f4ff;border-radius:14px;padding:16px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:900;color:#0f2044;margin-bottom:10px">✈️ 제1터미널 (아시아나 OZ721)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:#fff;border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">단기주차장</div>
+            <div style="font-size:16px;font-weight:800;color:#1e5fd4">₩24,000</div>
+            <div style="font-size:11px;color:#64748b">1일 최대</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">장기주차장</div>
+            <div style="font-size:16px;font-weight:800;color:#0e8a7c">₩9,000</div>
+            <div style="font-size:11px;color:#64748b">1일 최대</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#374151;line-height:1.8;background:#fff;border-radius:10px;padding:12px">
+          <strong>💡 꿀팁</strong><br>
+          • 최초 10분 무료<br>
+          • 장기주차장은 터미널에서 1.5~1.8km → 무료 셔틀버스 이용<br>
+          • 장기주차장 P1~P4 중 동편/서편 확인 후 가까운 곳으로<br>
+          • 주차 후 주변 사진 찍어두면 찾을 때 편리
+        </div>
+      </div>
+
+      <!-- T2 -->
+      <div style="background:#f0fdf4;border-radius:14px;padding:16px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:900;color:#0f2044;margin-bottom:10px">✈️ 제2터미널 (에어프레미아 YP801 없음 — 아시아나 출국자 해당)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:#fff;border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">단기주차장</div>
+            <div style="font-size:16px;font-weight:800;color:#1e5fd4">₩24,000</div>
+            <div style="font-size:11px;color:#64748b">1일 최대</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;padding:12px">
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">장기주차장</div>
+            <div style="font-size:16px;font-weight:800;color:#0e8a7c">₩9,000</div>
+            <div style="font-size:11px;color:#64748b">1일 최대</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#374151;line-height:1.8;background:#fff;border-radius:10px;padding:12px">
+          <strong>⚠️ 주의</strong><br>
+          • T2는 규모가 T1보다 작아 만차 가능 → 미리 확인 필수<br>
+          • 최초 10분 무료 (T1/T2 동일)<br>
+          • 문의: 032-741-0260 (교통관리센터)
+        </div>
+      </div>
+
+      <!-- 발렛 -->
+      <div style="background:#fdf6e3;border-radius:14px;padding:16px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:900;color:#0f2044;margin-bottom:8px">🚗 주차대행 (발렛) 서비스</div>
+        <div style="font-size:12px;color:#374151;line-height:1.8">
+          ✅ 인천공항 공식 주차대행 <strong>가능</strong>합니다!<br><br>
+          <strong>이용 방법</strong><br>
+          • T1: 단기주차장 지하1층 주차대행 전용 접수장<br>
+          • T2: 동일 방식, 별도 접수장<br>
+          • 주차료: 장기주차장 요금 적용 (일 ₩9,000)<br>
+          • 서비스 요금: 별도 (후불 정산)<br><br>
+          <strong>⚠️ 사설 주차 주의</strong><br>
+          공항 진입로에서 호객하는 사설주차는 인천공항공사와 무관 → 피해 발생 시 공항 무책임. 반드시 공식 접수장 이용!
+        </div>
+      </div>
+
+      <!-- 4박 5일 예상 비용 -->
+      <div style="background:#f0f4ff;border-radius:12px;padding:14px">
+        <div style="font-size:13px;font-weight:800;color:#1e5fd4;margin-bottom:8px">💰 홍콩 여행 (4박 5일) 예상 주차비</div>
+        <div style="font-size:12px;color:#374151;line-height:2">
+          단기주차 4일 × ₩24,000 = <strong style="color:#dc2626">₩96,000</strong><br>
+          장기주차 4일 × ₩9,000 = <strong style="color:#0e8a7c">₩36,000</strong> ← 추천!<br>
+          발렛(장기요금) 4일 = <strong>₩36,000 + 서비스료</strong>
+        </div>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+// ─────────────────────────────────────────────
+// 호텔 정보 모달
+// ─────────────────────────────────────────────
+function showHotelInfo(){
+  const old = document.getElementById('_hotelModal');
+  if(old) old.remove();
+  const modal = document.createElement('div');
+  modal.id = '_hotelModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:24px 20px 40px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:16px;font-weight:900;color:#0f2044">🏨 숙박 호텔 안내</div>
+        <button onclick="document.getElementById('_hotelModal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8">×</button>
+      </div>
+
+      <!-- 호텔 1 -->
+      <div style="background:#f0f4ff;border-radius:16px;overflow:hidden;margin-bottom:16px">
+        <div style="background:linear-gradient(135deg,#1e5fd4,#0a1628);padding:16px">
+          <div style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:4px">시티투어 & 자유일정 (소규모)</div>
+          <div style="font-size:16px;font-weight:900;color:#fff">Four Points by Sheraton</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">Hong Kong, Tung Chung</div>
+        </div>
+        <div style="padding:14px">
+          <div style="font-size:12px;color:#374151;line-height:1.9">
+            <strong>📍 주소</strong><br>
+            9 Yi Tung Road, Tung Chung<br>
+            Lantau Island, Hong Kong<br>
+            怡東路9號, 東涌, 大嶼山<br><br>
+            <strong>🚇 교통</strong><br>
+            • MTR 퉁충역 도보 10~13분<br>
+            • 홍콩 국제공항 차로 약 5분<br>
+            • 무료 공항 셔틀버스 운행<br><br>
+            <strong>✨ 주변</strong><br>
+            • 씨티게이트 아울렛 도보 13분<br>
+            • 옹핑 360 케이블카 인근<br>
+            • 홍콩 디즈니랜드 차로 15분
+          </div>
+          <a href="https://maps.google.com/?q=Four+Points+by+Sheraton+Hong+Kong+Tung+Chung" target="_blank"
+            style="display:flex;align-items:center;justify-content:center;gap:8px;background:#1e5fd4;color:#fff;border-radius:10px;padding:12px;margin-top:12px;text-decoration:none;font-size:13px;font-weight:700">
+            🗺 구글 지도에서 보기
+          </a>
+        </div>
+      </div>
+
+      <!-- 호텔 2 -->
+      <div style="background:#f0fdf4;border-radius:16px;overflow:hidden">
+        <div style="background:linear-gradient(135deg,#0e8a7c,#0a2010);padding:16px">
+          <div style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:4px">대규모 (200인 이상)</div>
+          <div style="font-size:16px;font-weight:900;color:#fff">Regala Skycity Hotel</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8)">丽豪航天城酒店</div>
+        </div>
+        <div style="padding:14px">
+          <div style="font-size:12px;color:#374151;line-height:1.9">
+            <strong>📍 주소</strong><br>
+            8 Exhibition Drive, Hong Kong<br>
+            香港离岛区航展道8号<br><br>
+            <strong>🚇 교통</strong><br>
+            • 홍콩 국제공항 직결 (도보 가능)<br>
+            • AsiaWorld-Expo 인접<br>
+            • 에어포트 익스프레스 공항역<br><br>
+            <strong>✨ 특징</strong><br>
+            • 200명 이상 대형 단체 수용 가능<br>
+            • Regal Hotels 운영<br>
+            • 컨퍼런스 시설 완비
+          </div>
+          <a href="https://maps.google.com/?q=Regala+Skycity+Hotel+Hong+Kong+Airport" target="_blank"
+            style="display:flex;align-items:center;justify-content:center;gap:8px;background:#0e8a7c;color:#fff;border-radius:10px;padding:12px;margin-top:12px;text-decoration:none;font-size:13px;font-weight:700">
+            🗺 구글 지도에서 보기
+          </a>
+        </div>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}

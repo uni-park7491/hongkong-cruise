@@ -206,7 +206,7 @@ function switchTab(tab){
 
   // 탭별 콘텐츠 렌더
   if(tab === 'schedule') renderAppSchedule();
-  if(tab === 'community') renderAppCommunity();
+  if(tab === 'community') renderAppChat();
   if(tab === 'myinfo') renderMyInfoScreen(appUser);
   // 카드 진입 애니메이션
   setTimeout(()=>{ const s=document.getElementById('screen-'+tab); if(s) reanimateCards(s); }, 50);
@@ -392,7 +392,7 @@ function renderMemberListHTML(){
   return html;
 }
 
-function renderAppCommunity(){
+function renderAppChat(){
   const content = document.getElementById('appCommunityContent');
   if(!content || content.dataset.loaded) return;
   const secEl = document.getElementById('community');
@@ -870,4 +870,15 @@ function openPopupSection(id){
 
 function closePopupSection(e){
   if(e.target===document.getElementById('popupSectionOverlay')) closeAll();
+}
+
+function renderAppChat(content){
+  if(typeof initCommunity === 'function') initCommunity();
+  content.innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="font-size:18px;font-weight:900;color:var(--navy)">💬 채팅 & 게시판</div>
+      <div style="font-size:12px;color:var(--gray2);margin-top:2px">실시간 소통 공간</div>
+    </div>
+    <div id="communitySection"></div>`;
+  setTimeout(()=>{ if(typeof initCommunity==='function') initCommunity(); }, 100);
 }

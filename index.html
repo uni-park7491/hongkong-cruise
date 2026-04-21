@@ -143,6 +143,11 @@
     </div>
 
     <div class="home-grid">
+      <div class="home-card anim-card" onclick="switchTab('chat')">
+        <span class="home-card-ico">📋</span>
+        <div class="home-card-title">게시판</div>
+        <div class="home-card-sub">공지 · 투표 · 방명록</div>
+      </div>
       <div class="home-card anim-card" onclick="appNav('cruise')">
         <span class="home-card-ico">🚢</span>
         <div class="home-card-title">크루즈 정보</div>
@@ -190,7 +195,7 @@
   </div>
 
   <!-- 커뮤니티 스크린 -->
-  <div class="app-screen hidden-right" id="screen-community">
+  <div class="app-screen hidden-right" id="screen-chat">
     <div id="appCommunityContent"></div>
   </div>
 
@@ -343,7 +348,7 @@
         <div class="day-head"><div class="dt">APR 24 · FRI</div><div class="ttl">탑승 &amp; 웰컴 나이트</div></div>
         <div class="day-body">
           <div class="ti"><div class="t">~16:00</div><div class="d">홍콩 공항 도착 &amp; 픽업<br><span class="tag">공항 픽업 지원</span></div></div>
-          <div class="ti"><div class="t">16–18</div><div class="d">크루즈 탑승 수속<br><small style="color:#64748b">16시까지 공항 도착 필수</small></div></div>
+          <div class="ti"><div class="t">16–18</div><div class="d"><span class="sched-yellow">크루즈 탑승 수속 — 여권 지참!</span><br><small style="color:#64748b">16시까지 공항 도착 필수</small></div></div>
           <div class="ti"><div class="t">21:00</div><div class="d">🚢 크루즈 출항<br>저녁 식사 · 웰컴 파티</div></div>
         </div>
       </div>
@@ -352,17 +357,17 @@
         <div class="day-body">
           <div class="ti"><div class="t">10–11:30</div><div class="d">🎤 오프닝 세션<br>개막사·축하공연·프로젝트 발표</div></div>
           <div class="ti"><div class="t">12–14</div><div class="d">🍽 점심 식사</div></div>
-          <div class="ti"><div class="t">14–17</div><div class="d">🌏 국가별 커뮤니티 회의<br><span class="tag">🇰🇷 한국 · 메인홀</span></div></div>
-          <div class="ti"><div class="t">19–21:30</div><div class="d">🚀 저녁 프로젝트 세션</div></div>
+          <div class="ti"><div class="t">14–17</div><div class="d">🌏 <span class="sched-blue">국가별 커뮤니티 회의</span><br><span class="tag">🇰🇷 한국 · 메인홀</span></div></div>
+          <div class="ti"><div class="t">19–21:30</div><div class="d">🚀 <span class="sched-blue">저녁 프로젝트 세션</span></div></div>
           <div class="ti"><div class="t">22:00~</div><div class="d">🎭 글로벌 공연 · 교류의 밤</div></div>
         </div>
       </div>
       <div class="day-card">
-        <div class="day-head"><div class="dt">APR 26 · SUN</div><div class="ttl">하선 &amp; 홍콩 시티투어</div></div>
+        <div class="day-head"><div class="dt">APR 26 · SUN</div><div class="ttl">하선 &amp; <span class="sched-blue">홍콩 시티투어</span></div></div>
         <div class="day-body">
           <div class="ti"><div class="t">09:00</div><div class="d">🚢 크루즈 하선</div></div>
           <div class="ti"><div class="t">종일</div><div class="d">🚍 홍콩 1일 시티투어</div></div>
-          <div class="ti"><div class="t">투어 후</div><div class="d">🏨 호텔 체크인</div></div>
+          <div class="ti"><div class="t">투어 후</div><div class="d">🏨 <span class="sched-yellow">호텔 체크인 — 여권 지참</span></div></div>
         </div>
       </div>
       <div class="day-card">
@@ -672,7 +677,7 @@
         <div class="info-body">
           <div class="info-item"><span class="ico2">📅</span><div><strong>탑승일: 2026년 4월 24일 (금)</strong><br>· 16:00까지 홍콩 크루즈 터미널 탑승 수속<br>· 21:00 출항 (환영 파티 · 웰컴 나이트)</div></div>
           <div class="info-item"><span class="ico2">📅</span><div><strong>메인 일정: 4월 25일 (토)</strong><br>· 오전 오프닝 세션 · 국가별 회의<br>· 저녁 프로젝트 세션 · 교류의 밤</div></div>
-          <div class="info-item"><span class="ico2">📅</span><div><strong>하선일: 4월 26일 (일)</strong><br>· 09:00 크루즈 하선<br>· 홍콩 1일 시티투어 · 호텔 체크인</div></div>
+          <div class="info-item"><span class="ico2">📅</span><div><strong>하선일: 4월 26일 (일)</strong><br>· <span class="sched-red">09:00 크루즈 하선</span><br>· 홍콩 1일 시티투어 · 호텔 체크인</div></div>
           <div class="info-item"><span class="ico2">🛳️</span><div><strong>크루즈 탑승 준비물</strong><br>· 여권 원본 · 탑승권(이메일 확인)<br>· 신용카드(선내 결제 등록용)<br>· 멀미약 · 상비약 · 편한 복장</div></div>
           <div class="info-item"><span class="ico2">📞</span><div><strong>긴급 연락</strong><br>· 인솔 박수영(유니): 010-4999-4116<br>· 크루즈 의무실: 선내 내선 전화 이용</div></div>
         </div>
