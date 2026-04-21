@@ -14,7 +14,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA4B2GrUt4AHIOWKB1qI_Or_nm87uEEuYw",
@@ -31,7 +31,7 @@
 
     // ── 전역에 노출
     window._db = db;
-    window._fs = { doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove };
+    window._fs = { doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove };
     window._fbReady = true;
     // DOMContentLoaded 보장 후 이벤트 발생
     if(document.readyState === 'loading'){
@@ -377,12 +377,12 @@
         <div class="day-body">
           <div class="ti"><div class="t">아침</div><div class="d">🍽 호텔 조식 후 체크아웃</div></div>
           <div class="ti"><div class="t">낮~저녁</div><div class="d">🗺 자유 일정 (조율 중)<br><span class="tag">유니다오 인솔 하에 이동</span></div></div>
-          <div class="ti"><div class="t">22:30</div><div class="d">🚕 홍콩 국제공항 출발</div></div>
+          <div class="ti"><div class="t"><span style="color:#dc2626;font-weight:800">22:30</span></div><div class="d"><span class="sched-red">🚕 공항 집결 — 지각 절대 불가</span></div></div>
           <div class="ti"><div class="t">23:00</div><div class="d">🛬 홍콩 공항 T1 도착<br>아시아나 체크인 · 수하물 위탁</div></div>
         </div>
       </div>
       <div class="day-card">
-        <div class="day-head"><div class="dt">APR 28 · TUE</div><div class="ttl">귀국 (화요일 새벽)</div></div>
+        <div class="day-head"><div class="dt">APR 28 · TUE</div><div class="ttl"><span class="sched-red">귀국 (화요일 새벽)</span></div></div>
         <div class="day-body">
           <div class="ti"><div class="t">01:40</div><div class="d">✈️ 아시아나 OZ746 출발<br><span class="tag">홍콩 T1 → 인천 T2</span></div></div>
           <div class="ti"><div class="t">06:20</div><div class="d">🛬 인천국제공항 T2 도착<br>수하물 수취 후 귀가</div></div>
@@ -1177,7 +1177,7 @@
         if(typeof initCommunity === 'function') initCommunity();
 
         // PWA 설치 배너
-        if(typeof showInstallBanner === 'function') setTimeout(showInstallBanner, 3000);
+        if(typeof showInstallBanner==='function' && !window.matchMedia('(display-mode:standalone)').matches && !window.navigator.standalone) setTimeout(showInstallBanner,3000);
 
       }, 2000);
     });

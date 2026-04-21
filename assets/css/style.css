@@ -685,9 +685,9 @@ body.is-admin .qn-btn.admin-only { display: flex !important; }
 /* 헤더 */
 .az-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid #eee; }
 .az-header-left { display:flex; align-items:center; gap:8px; }
-.az-header-airline { font-size:12px; font-weight:800; color:#111; letter-spacing:.04em; }
-.az-header-alliance { font-size:8px; color:#666; border-left:1px solid #ccc; padding-left:8px; letter-spacing:.04em; }
-.az-header-economy { font-size:18px; font-weight:900; color:#111; letter-spacing:.08em; }
+.az-header-airline { font-size:12px; font-weight:800; color:#fff; letter-spacing:.04em; }
+.az-header-alliance { font-size:8px; color:rgba(255,255,255,.7); border-left:1px solid rgba(255,255,255,.3); padding-left:8px; letter-spacing:.04em; }
+.az-header-economy { font-size:18px; font-weight:900; color:rgba(255,255,255,.15); letter-spacing:.08em; }
 /* 메인 2단 레이아웃 */
 .az-main { display:flex; }
 /* 왼쪽 큰 섹션 */
@@ -1860,3 +1860,8 @@ body.app-mode .my-flight-card {
   font-weight: 800 !important;
   color: #0f2044 !important;
 }
+
+/* ── 일정 색상 강조 ── */
+.sched-red { color: #dc2626 !important; font-weight: 800 !important; }
+.sched-yellow { color: #d97706 !important; font-weight: 700 !important; }
+.sched-blue { color: #1e5fd4 !important; font-weight: 600 !important; }

@@ -229,6 +229,9 @@ function toggleDone(cb){
 }
 
 function showInstallBanner(){
+  // 이미 PWA로 설치됐으면 배너 안 보임
+  if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return;
+  if(window.navigator.standalone === true) return;
   if(document.getElementById('pwaInstallBanner')) return;
   const banner = document.createElement('div');
   banner.id = 'pwaInstallBanner';
