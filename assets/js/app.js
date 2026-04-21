@@ -194,7 +194,7 @@ function switchTab(tab){
   }
 
   // 헤더 타이틀
-  const titles = {home:'ONCHAIN 2140', schedule:'행사 일정', community:'커뮤니티', myinfo:'내 정보'};
+  const titles = {home:'ONCHAIN 2140', schedule:'행사 일정', chat:'💬 채팅', myinfo:'내 정보'};
   const titleEl = document.getElementById('appHeaderTitle');
   if(titleEl) titleEl.textContent = titles[tab] || 'ONCHAIN 2140';
 
@@ -206,7 +206,7 @@ function switchTab(tab){
 
   // 탭별 콘텐츠 렌더
   if(tab === 'schedule') renderAppSchedule();
-  if(tab === 'chat') renderAppChat(content);
+  if(tab === 'chat') renderAppChat(document.getElementById('appChatContent'));
   if(tab === 'myinfo') renderMyInfoScreen(appUser);
   // 카드 진입 애니메이션
   setTimeout(()=>{ const s=document.getElementById('screen-'+tab); if(s) reanimateCards(s); }, 50);
@@ -243,6 +243,32 @@ function appNav(type){
     renderAppEmergency(content);
   } else if(type === 'attractions'){
     renderAppAttractions(content);
+  } else if(type === 'community-board'){
+    // 게시판 전용 (투표+방명록)
+    const titleEl = document.getElementById('appHeaderTitle');
+    if(titleEl) titleEl.textContent = '📋 게시판';
+    const subScreen = document.getElementById('screen-sub');
+    const content = document.getElementById('appSubContent');
+    if(!subScreen || !content) return;
+    document.querySelectorAll('.app-screen').forEach(s=>{
+      s.classList.remove('active');
+      if(s.id !== 'screen-sub') s.classList.add('hidden-left');
+    });
+    subScreen.classList.remove('hidden-right','hidden-left','active');
+    subScreen.classList.add('active');
+    screenHistory.push('sub:community-board');
+    const back = document.getElementById('appHeaderBack');
+    if(back) back.classList.add('show');
+    // 커뮤니티 섹션 복사
+    const commEl = document.getElementById('community');
+    if(commEl){
+      const clone = commEl.cloneNode(true);
+      clone.classList.remove('popup-section','admin-only');
+      clone.style.cssText = 'display:block;box-shadow:none;background:transparent;padding:0;border-radius:0';
+      content.innerHTML = '';
+      content.appendChild(clone);
+    }
+    if(typeof initCommunity === 'function') initCommunity();
   } else if(type === 'cruise-ticket'){
     if(typeof showCruiseTicket === 'function') showCruiseTicket();
     // sub screen으로 가지 않고 모달 열기
@@ -405,32 +431,7 @@ function renderMemberListHTML(){
   return html;
 }
 
-function renderAppChat(content){
-  if(!content) return;
-  // Firebase 커뮤니티 초기화
-  content.innerHTML = `
-    <div id="communityInner" style="min-height:60vh">
-      <div style="text-align:center;padding:40px 0;color:var(--gray2)">
-        <div style="font-size:32px;margin-bottom:8px">💬</div>
-        <div style="font-size:14px">로딩 중...</div>
-      </div>
-    </div>`;
-  
-  // Community 섹션의 내용을 가져와 삽입
-  setTimeout(function(){
-    const inner = document.getElementById('communityInner');
-    if(!inner) return;
-    const commEl = document.getElementById('community');
-    if(commEl){
-      const clone = commEl.cloneNode(true);
-      clone.id = 'communityClone_' + Date.now();
-      clone.style.cssText = 'box-shadow:none;background:transparent;padding:0;border-radius:0';
-      inner.innerHTML = '';
-      inner.appendChild(clone);
-    }
-    if(typeof initCommunity === 'function') initCommunity();
-  }, 100);
-}
+
 
 function renderMyInfoScreen(pax){
   const content = document.getElementById('appMyInfoContent');
@@ -896,13 +897,121 @@ function closePopupSection(e){
   if(e.target===document.getElementById('popupSectionOverlay')) closeAll();
 }
 
+
+// ─────────────────────────────────────────────
+// 실시간 채팅 (Firebase Firestore)
+// ─────────────────────────────────────────────
+let chatUnsubscribe = null;
+
 function renderAppChat(content){
-  if(typeof initCommunity === 'function') initCommunity();
+  if(!content){ content = document.getElementById('appChatContent'); }
+  if(!content) return;
+
+  const user = appUser;
+  const myName = user ? user.nick : '익명';
+
   content.innerHTML = `
-    <div style="margin-bottom:12px">
-      <div style="font-size:18px;font-weight:900;color:var(--navy)">💬 채팅 & 게시판</div>
-      <div style="font-size:12px;color:var(--gray2);margin-top:2px">실시간 소통 공간</div>
-    </div>
-    <div id="communitySection"></div>`;
-  setTimeout(()=>{ if(typeof initCommunity==='function') initCommunity(); }, 100);
+    <div style="display:flex;flex-direction:column;height:100%;min-height:calc(100vh - 140px)">
+      <!-- 채팅 헤더 -->
+      <div style="padding:12px 16px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0">
+        <div style="font-size:15px;font-weight:900;color:var(--navy)">💬 그룹 채팅</div>
+        <div style="font-size:11px;color:var(--gray2);margin-top:2px">ONCHAIN 2140 · 홍콩 크루즈 22명</div>
+      </div>
+      <!-- 메시지 목록 -->
+      <div id="chatMessages" style="flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#f8faff"></div>
+      <!-- 입력창 -->
+      <div style="padding:10px 12px;background:var(--white);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;align-items:flex-end">
+        <textarea id="chatInput" placeholder="메시지를 입력하세요..."
+          style="flex:1;border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;resize:none;outline:none;max-height:100px;line-height:1.5;background:var(--bg)"
+          rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"></textarea>
+        <button onclick="sendChatMsg()" style="background:linear-gradient(135deg,#1e5fd4,#0e8a7c);border:none;border-radius:12px;padding:10px 16px;color:#fff;font-size:20px;cursor:pointer;flex-shrink:0;line-height:1">➤</button>
+      </div>
+    </div>`;
+
+  // 채팅 리스너 시작
+  startChatListener();
 }
+
+function startChatListener(){
+  if(chatUnsubscribe) chatUnsubscribe();
+  try {
+    const { collection, query, orderBy, onSnapshot, limit } = window._fs || {};
+    const db = window._db;
+    if(!db || !collection) return;
+    const q = query(collection(db, 'groupChat'), orderBy('ts','asc'), limit(100));
+    chatUnsubscribe = onSnapshot(q, snap => {
+      const msgs = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      renderChatMessages(msgs);
+    });
+  } catch(e){ console.warn('Chat error:', e); }
+}
+
+function renderChatMessages(msgs){
+  const el = document.getElementById('chatMessages');
+  if(!el) return;
+  const myNick = appUser ? appUser.nick : '';
+  
+  if(!msgs || !msgs.length){
+    el.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:13px;padding:40px 0">아직 메시지가 없어요.<br>첫 메시지를 보내보세요! 👋</div>';
+    return;
+  }
+
+  el.innerHTML = msgs.map(m => {
+    const isMe = m.nick === myNick;
+    const timeStr = m.ts ? new Date(m.ts.toMillis ? m.ts.toMillis() : m.ts).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) : '';
+    
+    if(isMe){
+      return `<div style="display:flex;justify-content:flex-end;gap:6px;align-items:flex-end">
+        <div style="font-size:10px;color:#94a3b8;flex-shrink:0">${timeStr}</div>
+        <div style="max-width:72%;background:linear-gradient(135deg,#1e5fd4,#0e8a7c);color:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:14px;line-height:1.5;word-break:break-word">${escapeHtml(m.text)}</div>
+      </div>`;
+    } else {
+      return `<div style="display:flex;gap:8px;align-items:flex-start">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#e8effe,#dde6fb);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#1e5fd4;flex-shrink:0">${(m.nick||'?')[0]}</div>
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:3px;font-weight:600">${escapeHtml(m.nick||'익명')}</div>
+          <div style="display:flex;gap:6px;align-items:flex-end">
+            <div style="max-width:72%;background:#fff;border:1px solid #e2e8f0;border-radius:4px 16px 16px 16px;padding:10px 14px;font-size:14px;line-height:1.5;word-break:break-word;box-shadow:0 1px 4px rgba(0,0,0,.06)">${escapeHtml(m.text)}</div>
+            <div style="font-size:10px;color:#94a3b8;flex-shrink:0">${timeStr}</div>
+          </div>
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  // 최신 메시지로 스크롤
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendChatMsg(){
+  const input = document.getElementById('chatInput');
+  if(!input) return;
+  const text = input.value.trim();
+  if(!text) return;
+
+  const nick = appUser ? appUser.nick : '익명';
+  input.value = '';
+  input.style.height = 'auto';
+
+  try {
+    const { collection, addDoc, serverTimestamp } = window._fs || {};
+    const db = window._db;
+    if(!db || !addDoc) return;
+    await addDoc(collection(db, 'groupChat'), {
+      text: text,
+      nick: nick,
+      name: appUser ? appUser.name : '익명',
+      ts: serverTimestamp()
+    });
+  } catch(e){ console.warn('Send error:', e); }
+}
+
+function escapeHtml(str){
+  if(!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// 실시간 채팅 (Firebase Firestore)
+// ─────────────────────────────────────────────

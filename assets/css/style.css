@@ -1815,3 +1815,48 @@ body.app-mode .my-flight-card {
   border-top: 2px dashed #334155 !important; 
 }
 
+
+/* ══ 탑승권 아코디언 최종 - 흰 글씨 확보 ══ */
+#bpAccordionContent .az-boarding-box {
+  border: 1.5px solid #0f2044 !important;
+  padding: 10px 12px !important;
+  border-radius: 6px !important;
+  background: #0f2044 !important;
+}
+#bpAccordionContent .az-boarding-box-label {
+  font-size: 10px !important;
+  color: rgba(255,255,255,.65) !important;
+  margin-bottom: 2px !important;
+}
+#bpAccordionContent .az-boarding-box-val {
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  font-family: Barlow, sans-serif !important;
+  line-height: 1.1 !important;
+}
+/* dep time 빨간 박스도 흰 글씨로 */
+#bpAccordionContent .az-boarding-box[style*="c8102e"] {
+  background: #c8102e !important;
+  border-color: #c8102e !important;
+}
+#bpAccordionContent .az-boarding-box[style*="c8102e"] .az-boarding-box-label,
+#bpAccordionContent .az-boarding-box[style*="c8102e"] .az-boarding-box-val {
+  color: #fff !important;
+}
+/* 이름/경로 텍스트 */
+#bpAccordionContent .az-name-val {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #0f2044 !important;
+}
+#bpAccordionContent .az-route-code {
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  color: #0f2044 !important;
+}
+#bpAccordionContent .az-fl-val {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #0f2044 !important;
+}
