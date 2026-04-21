@@ -173,7 +173,7 @@ function switchTab(tab){
   });
 
   // 스크린 전환 방향 결정
-  const tabOrder = ['home','schedule','community','myinfo'];
+  const tabOrder = ['home','schedule','chat','myinfo'];
   const prevIdx = tabOrder.indexOf(prev);
   const nextIdx = tabOrder.indexOf(tab);
   const goRight = nextIdx > prevIdx;
@@ -206,7 +206,7 @@ function switchTab(tab){
 
   // 탭별 콘텐츠 렌더
   if(tab === 'schedule') renderAppSchedule();
-  if(tab === 'community') renderAppChat();
+  if(tab === 'chat') renderAppChat(content);
   if(tab === 'myinfo') renderMyInfoScreen(appUser);
   // 카드 진입 애니메이션
   setTimeout(()=>{ const s=document.getElementById('screen-'+tab); if(s) reanimateCards(s); }, 50);
@@ -243,6 +243,19 @@ function appNav(type){
     renderAppEmergency(content);
   } else if(type === 'attractions'){
     renderAppAttractions(content);
+  } else if(type === 'cruise-ticket'){
+    if(typeof showCruiseTicket === 'function') showCruiseTicket();
+    // sub screen으로 가지 않고 모달 열기
+    appGoBack();
+  } else if(type === 'finance'){
+    if(typeof showFinanceWarning === 'function') showFinanceWarning();
+    appGoBack();
+  } else if(type === 'parking'){
+    if(typeof showParkingInfo === 'function') showParkingInfo();
+    appGoBack();
+  } else if(type === 'hotel'){
+    if(typeof showHotelInfo === 'function') showHotelInfo();
+    appGoBack();
   } else {
     // 기존 섹션 복사
     const sec = document.getElementById(type);
@@ -346,7 +359,7 @@ function renderAppSchedule(){
     +' onmouseover="this.style.background=\'var(--blue-light)\'" onmouseout="this.style.background=\'var(--white)\'">'
     +'<div style="width:38px;height:38px;background:var(--blue-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👥</div>'
     +'<div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--navy)">참석자 명단</div>'
-    +'<div style="font-size:12px;color:var(--gray2);margin-top:1px">22명 전체 명단</div></div>'
+    +'<div style="font-size:12px;color:var(--gray2);margin-top:1px">전체 명단</div></div>'
     +'<span id="memberListArrow" style="color:var(--gray2);font-size:16px;transition:transform .3s">▼</span>'
     +'</div>'
     +'<div id="memberListPanel" style="display:none;background:var(--white);border-radius:0 0 14px 14px;box-shadow:var(--shadow);overflow:hidden;margin-top:-4px">'

@@ -1959,3 +1959,20 @@ body.app-mode .my-flight-card {
 }
 #bpAccordionContent .az-right-eco { font-size: 10px !important; color: rgba(255,255,255,.5) !important; margin-bottom: 4px !important; }
 #bpAccordionContent .az-right-seat-num { font-size: 2.2rem !important; font-weight: 900 !important; color: #ffca22 !important; font-family: Barlow, sans-serif !important; line-height: 1 !important; }
+
+/* ── 탭바 텍스트 완전 제거 (tab-lbl, tab-txt 모두) ── */
+.tab-lbl, .tab-txt { display: none !important; }
+.app-tab { 
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px 0 10px !important;
+  gap: 0 !important;
+  min-height: 56px !important;
+}
+.tab-ico { 
+  font-size: 24px !important; 
+  line-height: 1 !important;
+  margin: 0 !important;
+  display: block !important;
+}
