@@ -17,6 +17,7 @@ const PAX_DATA = [
   {name:'박유리',  nick:'유리',    phone:'010-7242-2411', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'미정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'미정'},
   {name:'박정이', nick:'맥가이버', phone:'010-5342-0356', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26A'},
   {name:'박평심',  nick:'평심',    phone:'010-4931-1866', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23C'},
+  {name:'박혜덕',  nick:'쏘냐',    phone:'010-5249-3115', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27A', passport:'M06607772', cabin:'10225', deck:'10', muster:'D'},
   {name:'서정희',  nick:'크리스탈',phone:'010-2476-2378', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'33J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26F'},
   {name:'신경숙',  nick:'경숙',    phone:'010-0000-8121', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'미정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'미정', cabin:'8121', deck:'8', muster:'C'},
   {name:'안정원',  nick:'스텔라',  phone:'010-3662-3459', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32B', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26D'},
@@ -25,6 +26,7 @@ const PAX_DATA = [
   {name:'정금자',  nick:'금자',    phone:'010-5387-8192', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'35J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25F'},
   {name:'주재순',  nick:'재순',    phone:'010-4166-2747', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23D'},
   {name:'최경환',  nick:'초이스',  phone:'010-3828-0303', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27D'},
+  {name:'최진홍',  nick:'마이콜',  phone:'010-6584-3289', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27C', passport:'M440V3016', cabin:'9258', deck:'9', muster:'B'},
   {name:'황중일',  nick:'중일',    phone:'010-5758-8192', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'35K', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25G'}
 ];
 
@@ -51,6 +53,8 @@ const adminData = [
   {no:21, name:'김수영',  eng:'KIM SOO YOUNG',    passport:'M810T8840', cabin:'9298', deck:'9', muster:'B', birth:'1950/04/01', phone:'010-3622-9644', gender:'여', room:'스탠다드'},
   {no:22, name:'김경애',  eng:'KIM GYEONGAE',     passport:'M22124164', cabin:'9282', deck:'9', muster:'B', birth:'1965/04/05', phone:'010-5092-1407', gender:'여', room:'스탠다드'},
   {no:23, name:'신경숙',  eng:'SIN KYEONGSUK',    passport:'M071R4644',          birth:'1959/10/02', phone:'010-0000-0000', gender:'여', room:'스탠다드'},
+  {no:24, name:'최진홍',  eng:'CHOI JINHONG',    passport:'M440V3016', birth:'1963/01/19', phone:'010-6584-3289', gender:'남', room:'스탠다드'},
+  {no:25, name:'박혜덕',  eng:'PARK HYEDUCK',   passport:'M06607772', birth:'1963/08/08', phone:'010-5249-3115', gender:'여', room:'스탠다드'},
 ];
 
 // ── attractions ──

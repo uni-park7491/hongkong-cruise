@@ -935,16 +935,42 @@ function renderAppChat(content){
 
 function startChatListener(){
   if(chatUnsubscribe) chatUnsubscribe();
+  
+  // Firebase 준비 안 됐으면 fbready 이벤트 기다림
+  if(!window._db || !window._fs){
+    window.addEventListener('fbready', function onFbReady(){
+      window.removeEventListener('fbready', onFbReady);
+      startChatListener();
+    }, {once: true});
+    return;
+  }
+  
   try {
-    const { collection, query, orderBy, onSnapshot, limit } = window._fs || {};
+    const fs = window._fs;
     const db = window._db;
-    if(!db || !collection) return;
-    const q = query(collection(db, 'groupChat'), orderBy('ts','asc'), limit(100));
-    chatUnsubscribe = onSnapshot(q, snap => {
-      const msgs = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      renderChatMessages(msgs);
-    });
-  } catch(e){ console.warn('Chat error:', e); }
+    // orderBy ts없이 먼저 시도 (규칙 문제로 인덱스 없을 수 있음)
+    const q = fs.query(
+      fs.collection(db, 'groupChat'),
+      fs.orderBy('ts', 'asc'),
+      fs.limit(100)
+    );
+    chatUnsubscribe = fs.onSnapshot(q, 
+      function(snap){
+        const msgs = snap.docs.map(function(d){ return Object.assign({id: d.id}, d.data()); });
+        renderChatMessages(msgs);
+      },
+      function(err){
+        console.warn('Chat listener error:', err.code, err.message);
+        // 에러 메시지 표시
+        const el = document.getElementById('chatMessages');
+        if(el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#dc2626;font-size:12px">채팅 연결 오류: ' + err.message + '<br>Firebase 보안 규칙을 확인해주세요.</div>';
+      }
+    );
+  } catch(e){ 
+    console.warn('Chat error:', e);
+    const el = document.getElementById('chatMessages');
+    if(el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#dc2626;font-size:12px">Firebase 연결 실패: ' + e.message + '</div>';
+  }
 }
 
 function renderChatMessages(msgs){
@@ -985,26 +1011,44 @@ function renderChatMessages(msgs){
 }
 
 async function sendChatMsg(){
-  const input = document.getElementById('chatInput');
+  var input = document.getElementById('chatInput');
   if(!input) return;
-  const text = input.value.trim();
-  if(!text) return;
-
-  const nick = appUser ? appUser.nick : '익명';
+  var text = input.value.trim();
+  if(!text || text.length > 500) return;
+  var nick = appUser ? appUser.nick : '익명';
+  var name = appUser ? appUser.name : '익명';
   input.value = '';
-  input.style.height = 'auto';
-
+  
+  if(!window._db || !window._fs){
+    alert('채팅 서버 연결 중입니다. 잠시 후 다시 시도해주세요.');
+    input.value = text;
+    return;
+  }
+  
   try {
-    const { collection, addDoc, serverTimestamp } = window._fs || {};
-    const db = window._db;
-    if(!db || !addDoc) return;
-    await addDoc(collection(db, 'groupChat'), {
+    var fs = window._fs;
+    var db = window._db;
+    var msgData = {
       text: text,
       nick: nick,
-      name: appUser ? appUser.name : '익명',
-      ts: serverTimestamp()
-    });
-  } catch(e){ console.warn('Send error:', e); }
+      name: name,
+      ts: fs.serverTimestamp ? fs.serverTimestamp() : new Date()
+    };
+    await fs.addDoc(fs.collection(db, 'groupChat'), msgData);
+  } catch(e){ 
+    console.warn('Send error:', e.code, e.message);
+    if(e.code === 'permission-denied'){
+      var el = document.getElementById('chatMessages');
+      if(el){
+        var notice = document.createElement('div');
+        notice.style.cssText = 'text-align:center;padding:10px;color:#dc2626;font-size:12px;background:#fef2f2;border-radius:8px;margin:8px 0';
+        notice.textContent = '⚠️ 채팅 권한 오류 - Firebase 규칙 확인 필요 (permission-denied)';
+        el.appendChild(notice);
+      }
+    } else {
+      input.value = text; // 실패시 복원
+    }
+  }
 }
 
 function escapeHtml(str){

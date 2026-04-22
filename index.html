@@ -39,6 +39,13 @@
     } else {
       window.dispatchEvent(new Event('fbready'));
     }
+    // 채팅 리스너 자동 갱신 (탭 전환 후에도)
+    window.addEventListener('fbready', function(){
+      if(typeof startChatListener === 'function' && document.getElementById('appChatContent')){
+        const chatEl = document.getElementById('appChatContent');
+        if(chatEl && chatEl.children.length > 0) startChatListener();
+      }
+    });
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
