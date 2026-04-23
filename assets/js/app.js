@@ -922,8 +922,9 @@ function renderAppChat(content){
       <!-- 입력창 -->
       <div style="padding:10px 12px;background:var(--white);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;align-items:flex-end">
         <textarea id="chatInput" placeholder="메시지를 입력하세요..."
-          style="flex:1;border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;resize:none;outline:none;max-height:100px;line-height:1.5;background:var(--bg)"
+          style="flex:1;border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:100px;line-height:1.5;background:var(--bg)"
           rows="1"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"></textarea>
         <button onclick="sendChatMsg()" style="background:linear-gradient(135deg,#1e5fd4,#0e8a7c);border:none;border-radius:12px;padding:10px 16px;color:#fff;font-size:20px;cursor:pointer;flex-shrink:0;line-height:1">➤</button>
       </div>
