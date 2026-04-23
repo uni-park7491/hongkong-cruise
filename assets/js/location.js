@@ -19,6 +19,7 @@ function _loadGMaps(cb) {
   s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&language=ko`;
   s.async = true;
   s.onload = () => { _gmapsLoaded = true; cb(); };
+  s.onerror = () => { console.warn('Google Maps 로드 실패 — 지도 기능 비활성화'); };
   document.head.appendChild(s);
 }
 
@@ -72,8 +73,9 @@ function _startSharing() {
 function _stopSharing() {
   if (_locInterval) { clearInterval(_locInterval); _locInterval = null; }
   const u = window._currentUser;
-  if (u && window._fs) {
-    const { db, doc, deleteDoc } = window._fs;
+  if (u && window._db && window._fs) {
+    const db = window._db;
+    const { doc, deleteDoc } = window._fs;
     if (doc && deleteDoc) deleteDoc(doc(db, 'locations', u.name)).catch(() => {});
   }
   _locSharing = false;
