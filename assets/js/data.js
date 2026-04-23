@@ -14,7 +14,7 @@ const PAX_DATA = [
   {name:'김채은',  nick:'채은',    phone:'010-3606-1523', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'35H', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25D'},
   {name:'박수영',  nick:'유니',    phone:'010-4999-4116', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32A', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26C'},
   {name:'박승범',  nick:'세일러',  phone:'010-7378-2225', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'34K', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'25H'},
-  {name:'박유리',  nick:'유리',    phone:'010-7242-2411', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'미정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'미정'},
+  {name:'박유리',  nick:'유리',    phone:'010-7242-2411', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'미정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'미정', passport:'M133B4626', cabin:'6163', deck:'6', muster:'B'},
   {name:'박정이', nick:'맥가이버', phone:'010-5342-0356', flight1:'OZ721', dep1:'인천T2 09:00', arr1:'홍콩 11:40', seat1:'32J', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'26A'},
   {name:'박평심',  nick:'평심',    phone:'010-4931-1866', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'23C'},
   {name:'박혜덕',  nick:'쏘냐',    phone:'010-5249-3115', flight1:'YP801', dep1:'인천T1 09:15', arr1:'홍콩 12:00', seat1:'현장배정', flight2:'OZ746', dep2:'홍콩T1 01:40', arr2:'인천T2 06:20', seat2:'27A', passport:'M06607772', cabin:'10225', deck:'10', muster:'D'},
