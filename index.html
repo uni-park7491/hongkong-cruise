@@ -1017,14 +1017,14 @@
 
   <!-- ══ JS 파일 (기능별 분리) ══ -->
   <script src="assets/js/data.js"></script>
-  <script src="assets/js/location.js"></script>
-  <script src="assets/js/cruiseMap.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/schedule.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/boarding.js"></script>
   <script src="assets/js/community.js"></script>
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/location.js"></script>
+  <script src="assets/js/cruiseMap.js"></script>
 
   <!-- ══ 초기화 ══ -->
   <script>
@@ -1057,8 +1057,12 @@
         if(typeof fetchHKWeather === 'function'){ fetchHKWeather(); setInterval(fetchHKWeather, 600000); }
         if(typeof initCommunity === 'function') initCommunity();
 
-        // GPS 위치 패널 초기화
-        if(typeof initLocationPanel === 'function') initLocationPanel();
+        // GPS 위치 패널 초기화 (Firebase 준비 후)
+        window.addEventListener('fbready', function(){
+          if(typeof initLocationPanel === 'function') initLocationPanel();
+        }, { once: true });
+        // Firebase 이미 준비된 경우 즉시 실행
+        if(window._fbReady && typeof initLocationPanel === 'function') initLocationPanel();
 
         if(typeof showInstallBanner==='function' && !window.matchMedia('(display-mode:standalone)').matches && !window.navigator.standalone) setTimeout(showInstallBanner,3000);
 

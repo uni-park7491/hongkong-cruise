@@ -82,37 +82,45 @@ function _stopSharing() {
 
 function _saveLocation(lat, lng) {
   const u = window._currentUser;
-  if (!u || !window._fs) return;
-  const { db } = window._fs;
-  if (!db) return;
-  import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js')
-    .then(({ doc, setDoc, serverTimestamp }) => {
+  if (!u) return;
+  const fs = window._fs;
+  const db = window._db || (fs && fs.db);
+  if (!fs || !db) return;
+  try {
+    const { doc, setDoc, serverTimestamp } = fs;
+    if (doc && setDoc) {
       setDoc(doc(db, 'locations', u.name), {
         name: u.name, nick: u.nick || u.name,
-        lat, lng, updatedAt: serverTimestamp()
+        lat, lng, updatedAt: serverTimestamp ? serverTimestamp() : new Date()
       });
-    }).catch(() => {
-      // fallback: _fs.addDoc 방식
-      if (window._fs.addDoc && window._fs.collection) {
-        window._fs.addDoc(window._fs.collection(db, 'locations_tmp'), {
-          name: u.name, nick: u.nick || u.name, lat, lng
-        });
-      }
-    });
+    } else if (fs.addDoc && fs.collection) {
+      fs.addDoc(fs.collection(db, 'locations'), {
+        name: u.name, nick: u.nick || u.name, lat, lng
+      });
+    }
+  } catch(e) { console.warn('위치 저장 오류:', e); }
 }
 
 /* ── Firestore 실시간 구독 ── */
 function _subscribeLocations() {
-  if (!window._fs) return;
-  const { db, collection, onSnapshot } = window._fs;
-  if (!db || !collection || !onSnapshot) return;
+  const fs = window._fs;
+  const db = window._db || (fs && fs.db);
+  if (!fs || !db) {
+    // Firebase 아직 미준비 → fbready 이후 재시도
+    window.addEventListener('fbready', _subscribeLocations, { once: true });
+    return;
+  }
+  const { collection, onSnapshot } = fs;
+  if (!collection || !onSnapshot) return;
   if (_locUnsub) _locUnsub();
-  _locUnsub = onSnapshot(collection(db, 'locations'), snap => {
-    const members = [];
-    snap.forEach(d => members.push(d.data()));
-    _renderMarkers(members);
-    _renderList(members);
-  }, () => {});
+  try {
+    _locUnsub = onSnapshot(collection(db, 'locations'), snap => {
+      const members = [];
+      snap.forEach(d => members.push(d.data()));
+      _renderMarkers(members);
+      _renderList(members);
+    }, () => {});
+  } catch(e) { console.warn('위치 구독 오류:', e); }
 }
 
 /* ── 지도 마커 렌더링 ── */
