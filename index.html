@@ -29,17 +29,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ── 전역에 노출
     window._db = db;
     window._fs = { doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, updateDoc, arrayUnion, arrayRemove };
     window._fbReady = true;
-    // DOMContentLoaded 보장 후 이벤트 발생
     if(document.readyState === 'loading'){
       document.addEventListener('DOMContentLoaded', ()=> window.dispatchEvent(new Event('fbready')));
     } else {
       window.dispatchEvent(new Event('fbready'));
     }
-    // 채팅 리스너 자동 갱신 (탭 전환 후에도)
     window.addEventListener('fbready', function(){
       if(typeof startChatListener === 'function' && document.getElementById('appChatContent')){
         const chatEl = document.getElementById('appChatContent');
@@ -50,7 +47,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-
 
 <!-- ══ 앱 상단 헤더 ══ -->
 <div id="appHeader">
@@ -76,7 +72,7 @@
         <span class="marquee-item sep">✦</span>
         <span class="marquee-item gold">APRIL 2026</span>
         <span class="marquee-item sep">✦</span>
-        <span class="marquee-item">루시팀 22명</span>
+        <span class="marquee-item">루시팀 24명</span>
         <span class="marquee-item sep">✦</span>
         <span class="marquee-item">HONG KONG LEADERSHIP CRUISE</span>
         <span class="marquee-item sep">✦</span>
@@ -88,7 +84,7 @@
         <span class="marquee-item sep">✦</span>
         <span class="marquee-item gold">APRIL 2026</span>
         <span class="marquee-item sep">✦</span>
-        <span class="marquee-item">루시팀 22명</span>
+        <span class="marquee-item">루시팀 24명</span>
         <span class="marquee-item sep">✦</span>
         <span class="marquee-item">HONG KONG LEADERSHIP CRUISE</span>
         <span class="marquee-item sep">✦</span>
@@ -96,7 +92,7 @@
         <span class="marquee-item sep">✦</span>
       </div>
     </div>
-    <!-- 날씨 카드 (최상단) -->
+    <!-- 날씨 카드 -->
     <div style="background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:12px;display:flex;align-items:center;gap:12px">
       <div style="font-size:34px" id="appWeatherIco">🌤️</div>
       <div style="flex:1">
@@ -115,7 +111,6 @@
           <div class="home-dday" id="appDday">D-—</div>
           <div class="home-dday-sub" id="appDdaySub">2026.04.24 출발까지</div>
         </div>
-        <!-- 시계 우측 -->
         <div style="text-align:right">
           <div style="margin-bottom:6px">
             <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:3px">🇭🇰 홍콩</div>
@@ -127,7 +122,6 @@
           </div>
         </div>
       </div>
-      <!-- AI 인사말 -->
       <div id="aiGreeting"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:10px">
         <span style="font-size:12px;color:rgba(255,255,255,.6)">🎫 탑승권 보기</span>
@@ -179,7 +173,7 @@
       <div class="home-card anim-card" onclick="appNav('emergency')">
         <span class="home-card-ico">🚨</span>
         <div class="home-card-title">비상연락망</div>
-        <div class="home-card-sub">22명 연락처</div>
+        <div class="home-card-sub">24명 연락처</div>
       </div>
       <div class="home-card anim-card" onclick="appNav('exchange')">
         <span class="home-card-ico">💱</span>
@@ -199,6 +193,26 @@
       </div>
     </div>
 
+    <!-- ══ GPS 팀원 위치 패널 ══ -->
+    <div style="margin-top:8px;background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:12px">
+      <!-- 헤더 -->
+      <div style="background:linear-gradient(135deg,#0a1628,#1e3a6e);padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.08em;margin-bottom:2px">LIVE · TEAM TRACKER</div>
+          <div style="font-size:15px;font-weight:700;color:#fff">팀원 위치 공유</div>
+        </div>
+        <button id="locShareBtn" onclick="toggleMyLocation()"
+          style="font-size:12px;padding:7px 14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);cursor:pointer;color:#fff;font-weight:600;font-family:inherit;transition:.2s">
+          내 위치 공유
+        </button>
+      </div>
+      <!-- 지도 -->
+      <div id="locMapCanvas" style="width:100%;height:240px;background:#e8eef4"></div>
+      <!-- 팀원 목록 -->
+      <div id="locMemberList" style="padding:10px 14px 14px">
+        <div style="font-size:13px;color:var(--gray);text-align:center;padding:6px 0">위치를 공유한 팀원이 아직 없어요</div>
+      </div>
+    </div>
 
   </div>
 
@@ -217,7 +231,7 @@
     <div id="appMyInfoContent"></div>
   </div>
 
-  <!-- 서브 스크린 (항공편, 관광지 등 팝업 대신) -->
+  <!-- 서브 스크린 -->
   <div class="app-screen hidden-right" id="screen-sub">
     <div id="appSubContent"></div>
   </div>
@@ -239,7 +253,6 @@
     <span class="tab-ico">👤</span>
   </button>
 </div>
-
 
 <!-- ══ 스플래시 스크린 ══ -->
 <div id="splashScreen">
@@ -272,8 +285,6 @@
     <div class="login-error" id="loginError">❌ 일치하는 정보가 없어요. 다시 확인해주세요.</div>
     <button class="login-btn" onclick="doLogin()">입장하기</button>
     <div style="display:flex;align-items:center;gap:8px;margin:8px 0"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:12px;color:var(--gray)">또는</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
-
-    <!-- 관리자 로그인 인라인 -->
     <button onclick="toggleAdminForm()" id="adminToggleBtn"
       style="width:100%;background:none;border:1.5px solid var(--border);border-radius:8px;padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--gray)">
       🔒 관리자 로그인
@@ -299,32 +310,28 @@
 </div>
 
 <!-- 개인 대시보드 -->
-
-  <!-- 개인 대시보드 -->
-  <div id="myDashboard" class="my-wrap" style="padding-top:0;display:none">
-    <div style="background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:14px;padding:20px 22px;color:#fff;margin-bottom:14px">
-      <div style="font-size:13px;opacity:.8;margin-bottom:4px">안녕하세요 👋</div>
-      <div id="myWelcomeName" style="font-family:Barlow,sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:2px"></div>
-      <div id="myWelcomeNick" style="font-size:13px;opacity:.8"></div>
-    </div>
-    <div id="myFlightCards"></div>
-    <!-- 일정 (비행기표 다음) -->
-    <div id="myScheduleSection"></div>
-    <!-- 참석자 명단 (제일 아래) -->
-    <div id="myMemberSection"></div>
-    <button onclick="exitMyView()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--gray);margin-top:8px">
-      🚪 로그아웃
-    </button>
+<div id="myDashboard" class="my-wrap" style="padding-top:0;display:none">
+  <div style="background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:14px;padding:20px 22px;color:#fff;margin-bottom:14px">
+    <div style="font-size:13px;opacity:.8;margin-bottom:4px">안녕하세요 👋</div>
+    <div id="myWelcomeName" style="font-family:Barlow,sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:2px"></div>
+    <div id="myWelcomeNick" style="font-size:13px;opacity:.8"></div>
   </div>
+  <div id="myFlightCards"></div>
+  <div id="myScheduleSection"></div>
+  <div id="myMemberSection"></div>
+  <button onclick="exitMyView()" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--gray);margin-top:8px">
+    🚪 로그아웃
+  </button>
+</div>
 
 <!-- 헤더 -->
 <div class="hero">
   <div class="hero-badge">ONCHAIN 2140 · APRIL 2026</div>
   <h1>홍콩 크루즈 <span>리더십 연수</span></h1>
-  <p class="hero-sub">HONG KONG LEADERSHIP CRUISE · 루시팀 22명</p>
+  <p class="hero-sub">HONG KONG LEADERSHIP CRUISE · 루시팀 24명</p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="lbl">기간</div><div class="val">04.24–04.28</div></div>
-    <div class="hero-stat"><div class="lbl">인원</div><div class="val">22명</div></div>
+    <div class="hero-stat"><div class="lbl">인원</div><div class="val">24명</div></div>
     <div class="hero-stat" id="ddayStat"><div class="lbl">출발까지</div><div class="val" id="ddayVal">—</div></div>
     <div class="hero-stat" id="weatherStat"><div class="lbl">홍콩 날씨</div><div class="val" id="weatherVal">🌤️ —</div></div>
   </div>
@@ -357,8 +364,8 @@
       <div class="day-card">
         <div class="day-head"><div class="dt">APR 24 · FRI</div><div class="ttl">출발 &amp; 탑승 · 웰컴 나이트</div></div>
         <div class="day-body">
-          <div class="ti"><div class="t"><span class="sched-red">09:00</span></div><div class="d"><span class="sched-red">✈ 아시아나 OZ721 인천T2 출발</span><br><small>탑승마감 08:20 · 홍콩 11:40 도착</small></div></div>
-          <div class="ti"><div class="t"><span class="sched-red">09:15</span></div><div class="d"><span class="sched-red">✈ 에어프레미아 YP801 인천T1 출발</span><br><small>탑승마감 08:35 · 홍콩 12:00 도착</small></div></div>
+          <div class="ti"><div class="t"><span class="sched-red">09:00</span></div><div class="d"><span class="sched-red">✈ 아시아나 OZ721 인천T2 출발</span><br><small>탑승 시간 08:20 · 홍콩 11:40 도착</small></div></div>
+          <div class="ti"><div class="t"><span class="sched-red">09:15</span></div><div class="d"><span class="sched-red">✈ 에어프레미아 YP801 인천T1 출발</span><br><small>탑승 시간 08:40 · 홍콩 12:00 도착</small></div></div>
           <div class="ti"><div class="t">14:00~</div><div class="d"><span class="sched-blue">🚌 공항 픽업 차량 순차 운행</span><br><small>14:00(3대) · 15:00(4대) · 16:00(4대) · 17:00(2대)</small></div></div>
           <div class="ti"><div class="t">집합지</div><div class="d"><span class="sched-yellow">📍 홍콩 카이탁 부두</span><br><small>홍콩 구룡 카이탁 승봉도 33번지</small></div></div>
           <div class="ti"><div class="t"><span class="sched-red">17:00~</span></div><div class="d"><span class="sched-red">🚢 탑승 수속 시작 (마감 20:00)</span><br><small>출항식: 탑승 로비 B</small></div></div>
@@ -401,7 +408,7 @@
               🛒 DFS 면세점 약 1시간
             </div>
           </div></div>
-          <div class="ti"><div class="t"><span class="sched-yellow">저녁</span></div><div class="d"><span class="sched-yellow">🏨 호텔 체크인 &amp; 저녁 식사</span><br><small>1~13호차·19호차 → 퉁충 쉐라톤 (호텔 내 식사)<br>14~18호차 → 리갈 에어포트 호텔 (별도 레스토랑)</small></div></div>
+          <div class="ti"><div class="t"><span class="sched-yellow">저녁</span></div><div class="d"><span class="sched-yellow">🏨 호텔 체크인 &amp; 저녁 식사</span><br><small>1~13호차·19호차 → 퉁충 쉐라톤<br>14~18호차 → 리갈 에어포트 호텔</small></div></div>
         </div>
       </div>
       <!-- 04.27 MON -->
@@ -421,7 +428,7 @@
         </div>
       </div>
     </div>
-    <div class="notice">📌 <strong>루시팀(22명) 안내</strong> — 웹키 행사 종료 후 <strong>유니다오의 인솔</strong>에 따라 이동합니다. 4월 27일 낮~저녁 자유 일정 후 밤 10시 30분경 공항으로 이동 · 새벽 1:40 OZ746편으로 귀국합니다.</div>
+    <div class="notice">📌 <strong>루시팀(24명) 안내</strong> — 웹키 행사 종료 후 <strong>유니다오의 인솔</strong>에 따라 이동합니다. 4월 27일 낮~저녁 자유 일정 후 밤 10시 30분경 공항으로 이동 · 새벽 1:40 OZ746편으로 귀국합니다.</div>
   </div>
 
   <!-- 항공편 -->
@@ -435,7 +442,7 @@
         <div class="fc-row"><span class="k">도착 (홍콩)</span><span class="v">2026.04.24 11:40</span></div>
         <div class="fc-row"><span class="k">출발 터미널</span><span class="v">인천 T2</span></div>
         <div class="fc-row"><span class="k">체크인 카운터</span><span class="v">G · H · J 구역</span></div>
-        <div class="fc-row"><span class="k">탑승 인원</span><span class="v">16명</span></div>
+        <div class="fc-row"><span class="k">탑승 인원</span><span class="v">17명</span></div>
         <div class="fc-map-hint">🗺 터미널 약도 보기 →</div>
       </div>
       <div class="flight-card premia-only" onclick="openMapModal('premia')">
@@ -445,7 +452,7 @@
         <div class="fc-row"><span class="k">도착 (홍콩)</span><span class="v">2026.04.24 12:00</span></div>
         <div class="fc-row"><span class="k">출발 터미널</span><span class="v">인천 T1</span></div>
         <div class="fc-row"><span class="k">체크인 카운터</span><span class="v">C카운터 (4번 출구)</span></div>
-        <div class="fc-row"><span class="k">체크인 마감</span><span class="v">08:15까지</span></div>
+        <div class="fc-row"><span class="k">탑승 인원</span><span class="v">7명</span></div>
         <div class="fc-map-hint">🗺 터미널 약도 보기 →</div>
       </div>
       <div class="flight-card">
@@ -467,184 +474,39 @@
     </div>
   </div>
 
-  <!-- 탑승객 -->
+  <!-- 탑승객 (관리자 전용 - 기존 유지) -->
   <div class="section admin-only" id="passengers">
     <div class="sec-title"><span class="ico">👥</span><h2>탑승객 명단</h2></div>
     <div class="stat-row">
-      <div class="stat"><div class="sl">전체 인원</div><div class="sv">22</div></div>
-      <div class="stat"><div class="sl">에어프레미아</div><div class="sv">6</div></div>
-      <div class="stat"><div class="sl">아시아나</div><div class="sv">16</div></div>
-      <div class="stat"><div class="sl">좌석 배정</div><div class="sv">22</div></div>
+      <div class="stat"><div class="sl">전체 인원</div><div class="sv">24</div></div>
+      <div class="stat"><div class="sl">에어프레미아</div><div class="sv">7</div></div>
+      <div class="stat"><div class="sl">아시아나</div><div class="sv">17</div></div>
     </div>
-    <input class="search-box" type="text" placeholder="이름 또는 닉네임으로 검색..." oninput="filterPax(this.value)">
-    <div class="tabs">
-      <button class="tab on" onclick="switchTab('all',this)">전체 22명</button>
-      <button class="tab" onclick="switchTab('premia',this)">에어프레미아 (6명)</button>
-      <button class="tab" onclick="switchTab('asiana',this)">아시아나 (16명)</button>
-    </div>
-    <div id="tc-all" class="tc on">
-      <table class="ptable" id="paxAll">
-        <thead><tr><th>No.</th><th>이름</th><th>닉네임</th><th>항공사</th><th>가는편 좌석</th><th>오는편 좌석</th></tr></thead>
-        <tbody id="paxAllBody">
-          <tr onclick="openTicket(1)"><td>1</td><td>박정이</td><td>맥가이버</td><td><span class="badge ba">아시아나</span></td><td class="mono">32J</td><td class="mono">26A</td></tr>
-          <tr onclick="openTicket(2)"><td>2</td><td>박수영</td><td>유니</td><td><span class="badge ba">아시아나</span></td><td class="mono">32A</td><td class="mono">26C</td></tr>
-          <tr onclick="openTicket(3)"><td>3</td><td>최경환</td><td>초이스</td><td><span class="badge ba">아시아나</span></td><td class="mono">32H</td><td class="mono">27D</td></tr>
-          <tr onclick="openTicket(4)"><td>4</td><td>우진희</td><td>루시</td><td><span class="badge ba">아시아나</span></td><td class="mono">32H</td><td class="mono">27D</td></tr>
-          <tr onclick="openTicket(5)"><td>5</td><td>안정원</td><td>스텔라</td><td><span class="badge ba">아시아나</span></td><td class="mono">32B</td><td class="mono">26D</td></tr>
-          <tr onclick="openTicket(6)"><td>6</td><td>김재담</td><td>썬킴</td><td><span class="badge ba">아시아나</span></td><td class="mono">33K</td><td class="mono">27E</td></tr>
-          <tr onclick="openTicket(7)"><td>7</td><td>서정희</td><td>크리스탈</td><td><span class="badge ba">아시아나</span></td><td class="mono">33J</td><td class="mono">26F</td></tr>
-          <tr onclick="openTicket(8)"><td>8</td><td>김도은</td><td>도은</td><td><span class="badge ba">아시아나</span></td><td class="mono">32K</td><td class="mono">26G</td></tr>
-          <tr onclick="openTicket(9)"><td>9</td><td>우종선</td><td>JS우</td><td><span class="badge ba">아시아나</span></td><td class="mono">33H</td><td class="mono">27F</td></tr>
-          <tr onclick="openTicket(10)"><td>10</td><td>박승범</td><td>세일러</td><td><span class="badge ba">아시아나</span></td><td class="mono">34K</td><td class="mono">25H</td></tr>
-          <tr onclick="openTicket(11)"><td>11</td><td>현승희</td><td>승희</td><td><span class="badge ba">아시아나</span></td><td class="mono">34J</td><td class="mono">25K</td></tr>
-          <tr onclick="openTicket(12)"><td>12</td><td>황중일</td><td>중일</td><td><span class="badge ba">아시아나</span></td><td class="mono">35K</td><td class="mono">25G</td></tr>
-          <tr onclick="openTicket(13)"><td>13</td><td>정금자</td><td>금자</td><td><span class="badge ba">아시아나</span></td><td class="mono">35J</td><td class="mono">25F</td></tr>
-          <tr onclick="openTicket(14)"><td>14</td><td>김채은</td><td>채은</td><td><span class="badge ba">아시아나</span></td><td class="mono">35H</td><td class="mono">25D</td></tr>
-          <tr onclick="openTicket(15)"><td>15</td><td>김무성</td><td>무성</td><td><span class="badge ba">아시아나</span></td><td class="mono">33A</td><td class="mono">25A</td></tr>
-          <tr onclick="openTicket(16)"><td>16</td><td>김경애</td><td>경애</td><td><span class="badge ba">아시아나</span></td><td class="mono">34H</td><td class="mono">25E</td></tr>
-          <tr onclick="openTicket(17)" style="background:#f0f8ff"><td>17</td><td class="hl">최운화</td><td>운화</td><td><span class="badge bp">에어프레미아</span></td><td class="mono" style="color:#e08000;font-weight:700">현장배정</td><td class="mono">23G</td></tr>
-          <tr onclick="openTicket(18)" style="background:#f0f8ff"><td>18</td><td class="hl">김인자</td><td>인자</td><td><span class="badge bp">에어프레미아</span></td><td class="mono" style="color:#e08000;font-weight:700">현장배정</td><td class="mono">23F</td></tr>
-          <tr onclick="openTicket(19)" style="background:#f0f8ff"><td>19</td><td class="hl">김명순</td><td>명순</td><td><span class="badge bp">에어프레미아</span></td><td class="mono" style="color:#e08000;font-weight:700">현장배정</td><td class="mono">23E</td></tr>
-          <tr onclick="openTicket(20)" style="background:#f0f8ff"><td>20</td><td class="hl">주재순</td><td>재순</td><td><span class="badge bp">에어프레미아</span></td><td class="mono" style="color:#e08000;font-weight:700">현장배정</td><td class="mono">23D</td></tr>
-          <tr onclick="openTicket(21)" style="background:#f0f8ff"><td>21</td><td class="hl">박평심</td><td>평심</td><td><span class="badge bp">에어프레미아</span></td><td class="mono" style="color:#e08000;font-weight:700">현장배정</td><td class="mono">23C</td></tr>
-          <tr onclick="openTicket(22)" style="background:#f0f8ff"><td>22</td><td class="hl">김수영</td><td>수영</td><td><span class="badge bp">에어프레미아</span></td><td class="mono" style="color:#e08000;font-weight:700">현장배정</td><td class="mono">23A</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div id="tc-premia" class="tc">
-      <table class="ptable"><thead><tr><th>No.</th><th>이름</th><th>닉네임</th><th>가는편 YP801</th><th>오는편 좌석 OZ746</th><th>가는편 티켓</th><th>오는편 티켓</th></tr></thead>
-      <tbody>
-        <tr onclick="openTicket(17)"><td>1</td><td class="hl">최운화</td><td>운화</td><td class="mono pending">현장배정</td><td class="mono">23G</td><td class="mono">988-6397053107</td><td class="mono">350-7471696247</td></tr>
-        <tr onclick="openTicket(18)"><td>2</td><td class="hl">김인자</td><td>인자</td><td class="mono pending">현장배정</td><td class="mono">23F</td><td class="mono">988-6397053108</td><td class="mono">350-7471696248</td></tr>
-        <tr onclick="openTicket(19)"><td>3</td><td class="hl">김명순</td><td>명순</td><td class="mono pending">현장배정</td><td class="mono">23E</td><td class="mono">988-6397053106</td><td class="mono">350-7471696246</td></tr>
-        <tr onclick="openTicket(20)"><td>4</td><td class="hl">주재순</td><td>재순</td><td class="mono pending">현장배정</td><td class="mono">23D</td><td class="mono">988-6397053110</td><td class="mono">350-7471696250</td></tr>
-        <tr onclick="openTicket(21)"><td>5</td><td class="hl">박평심</td><td>평심</td><td class="mono pending">현장배정</td><td class="mono">23C</td><td class="mono">988-6397053109</td><td class="mono">350-7471696249</td></tr>
-        <tr onclick="openTicket(22)"><td>6</td><td class="hl">김수영</td><td>수영</td><td class="mono pending">현장배정</td><td class="mono">23A</td><td class="mono">988-6397053109</td><td class="mono">350-7471696249</td></tr>
-      </tbody></table>
-    </div>
-    <div id="tc-asiana" class="tc">
-      <table class="ptable"><thead><tr><th>No.</th><th>이름</th><th>닉네임</th><th>가는편 OZ721</th><th>가는편 좌석</th><th>오는편 OZ746</th><th>오는편 좌석</th></tr></thead>
-      <tbody>
-        <tr onclick="openTicket(4)"><td>1</td><td>우진희</td><td>루시</td><td><span class="badge ba">OZ 721</span></td><td class="mono">32H</td><td><span class="badge ba">OZ 746</span></td><td class="mono">27D</td></tr>
-        <tr onclick="openTicket(5)"><td>2</td><td>안정원</td><td>스텔라</td><td><span class="badge ba">OZ 721</span></td><td class="mono">32B</td><td><span class="badge ba">OZ 746</span></td><td class="mono">26D</td></tr>
-        <tr onclick="openTicket(3)"><td>3</td><td>최경환</td><td>초이스</td><td><span class="badge ba">OZ 721</span></td><td class="mono">32H</td><td><span class="badge ba">OZ 746</span></td><td class="mono">27D</td></tr>
-        <tr onclick="openTicket(1)"><td>4</td><td>박정이</td><td>맥가이버</td><td><span class="badge ba">OZ 721</span></td><td class="mono">32J</td><td><span class="badge ba">OZ 746</span></td><td class="mono">26A</td></tr>
-        <tr onclick="openTicket(2)"><td>5</td><td>박수영</td><td>유니</td><td><span class="badge ba">OZ 721</span></td><td class="mono">32A</td><td><span class="badge ba">OZ 746</span></td><td class="mono">26C</td></tr>
-        <tr onclick="openTicket(7)"><td>6</td><td>서정희</td><td>크리스탈</td><td><span class="badge ba">OZ 721</span></td><td class="mono">33J</td><td><span class="badge ba">OZ 746</span></td><td class="mono">26F</td></tr>
-        <tr onclick="openTicket(6)"><td>7</td><td>김재담</td><td>썬킴</td><td><span class="badge ba">OZ 721</span></td><td class="mono">33K</td><td><span class="badge ba">OZ 746</span></td><td class="mono">27E</td></tr>
-        <tr onclick="openTicket(8)"><td>8</td><td>김도은</td><td>도은</td><td><span class="badge ba">OZ 721</span></td><td class="mono">32K</td><td><span class="badge ba">OZ 746</span></td><td class="mono">26G</td></tr>
-        <tr onclick="openTicket(9)"><td>9</td><td>우종선</td><td>JS우</td><td><span class="badge ba">OZ 721</span></td><td class="mono">33H</td><td><span class="badge ba">OZ 746</span></td><td class="mono">27F</td></tr>
-        <tr onclick="openTicket(10)"><td>10</td><td>박승범</td><td>세일러</td><td><span class="badge ba">OZ 721</span></td><td class="mono">34K</td><td><span class="badge ba">OZ 746</span></td><td class="mono">25H</td></tr>
-        <tr onclick="openTicket(11)"><td>11</td><td>현승희</td><td>승희</td><td><span class="badge ba">OZ 721</span></td><td class="mono">34J</td><td><span class="badge ba">OZ 746</span></td><td class="mono">25K</td></tr>
-        <tr onclick="openTicket(12)"><td>12</td><td>황중일</td><td>중일</td><td><span class="badge ba">OZ 721</span></td><td class="mono">35K</td><td><span class="badge ba">OZ 746</span></td><td class="mono">25G</td></tr>
-        <tr onclick="openTicket(13)"><td>13</td><td>정금자</td><td>금자</td><td><span class="badge ba">OZ 721</span></td><td class="mono">35J</td><td><span class="badge ba">OZ 746</span></td><td class="mono">25F</td></tr>
-        <tr onclick="openTicket(14)"><td>14</td><td>김채은</td><td>채은</td><td><span class="badge ba">OZ 721</span></td><td class="mono">35H</td><td><span class="badge ba">OZ 746</span></td><td class="mono">25D</td></tr>
-        <tr onclick="openTicket(15)"><td>15</td><td>김무성</td><td>무성</td><td><span class="badge ba">OZ 721</span></td><td class="mono">33A</td><td><span class="badge ba">OZ 746</span></td><td class="mono">25A</td></tr>
-        <tr onclick="openTicket(16)"><td>16</td><td>김경애</td><td>경애</td><td><span class="badge ba">OZ 721</span></td><td class="mono">34H</td><td><span class="badge ba">OZ 746</span></td><td class="mono">25E</td></tr>
-      </tbody></table>
-    </div>
-    <p style="font-size:13px;color:#64748b;margin-top:10px;text-align:center">👆 이름을 누르면 개인 탑승권을 볼 수 있습니다</p>
+    <p style="font-size:13px;color:#64748b;text-align:center;padding:20px">관리자 패널에서 개인정보를 확인하세요</p>
   </div>
 
-  <!-- 최종 정리 -->
+  <!-- 최종 정리 (관리자 전용) -->
   <div class="section admin-only" id="final">
-    <div class="sec-title"><span class="ico">📋</span><h2>최종 탑승 정보 전원</h2></div>
-    <div class="sort-bar">
-      <span>정렬:</span>
-      <button class="sb on" id="sortReset" onclick="resetSort(this)">번호순 ▲</button>
-      <button class="sb" onclick="sortFinal(1,this)">이름</button>
-      <button class="sb" onclick="sortFinal(2,this)">닉네임</button>
-      <button class="sb" onclick="sortFinal(3,this)">항공사</button>
-      <button class="sb" onclick="sortFinal(7,this)">가는편 좌석</button>
-      <button class="sb" onclick="sortFinal(12,this)">오는편 좌석</button>
-      <span style="font-size:12px;color:#94a3b8">같은 버튼 재클릭 → 역순</span>
-    </div>
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-    <table class="ftable" id="finalTable">
-      <thead>
-        <tr class="g1">
-          <th rowspan="2" class="center" style="vertical-align:middle">No.</th>
-          <th rowspan="2" style="vertical-align:middle">이름</th>
-          <th rowspan="2" style="vertical-align:middle">닉네임</th>
-          <th colspan="5" style="text-align:center;border-bottom:1px solid #1a4080">✈ 가는 편 (04.24)</th>
-          <th colspan="6" style="text-align:center;background:#0a3520;border-bottom:1px solid #1a6030">✈ 오는 편 (04.28 새벽)</th>
-        </tr>
-        <tr class="g2">
-          <th>항공사</th><th>편명</th><th>터미널</th><th>출발</th><th>좌석</th>
-          <th class="go">항공사</th><th class="go">편명</th><th class="go">터미널</th><th class="go">출발</th><th class="go">도착</th><th class="go">좌석</th>
-        </tr>
-      </thead>
-      <tbody id="finalBody">
-        <tr onclick="openTicket(1)"><td style="text-align:center">1</td><td>박정이</td><td>맥가이버</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">32J</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">26A</td></tr>
-        <tr onclick="openTicket(2)"><td style="text-align:center">2</td><td>박수영</td><td>유니</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">32A</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">26C</td></tr>
-        <tr onclick="openTicket(3)"><td style="text-align:center">3</td><td>최경환</td><td>초이스</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">32H</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">27D</td></tr>
-        <tr onclick="openTicket(4)"><td style="text-align:center">4</td><td>우진희</td><td>루시</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">32H</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">27D</td></tr>
-        <tr onclick="openTicket(5)"><td style="text-align:center">5</td><td>안정원</td><td>스텔라</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">32B</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">26D</td></tr>
-        <tr onclick="openTicket(6)"><td style="text-align:center">6</td><td>김재담</td><td>썬킴</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">33K</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">27E</td></tr>
-        <tr onclick="openTicket(7)"><td style="text-align:center">7</td><td>서정희</td><td>크리스탈</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">33J</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">26F</td></tr>
-        <tr onclick="openTicket(8)"><td style="text-align:center">8</td><td>김도은</td><td>도은</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">32K</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">26G</td></tr>
-        <tr onclick="openTicket(9)"><td style="text-align:center">9</td><td>우종선</td><td>JS우</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">33H</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">27F</td></tr>
-        <tr onclick="openTicket(10)"><td style="text-align:center">10</td><td>박승범</td><td>세일러</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">34K</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">25H</td></tr>
-        <tr onclick="openTicket(11)"><td style="text-align:center">11</td><td>현승희</td><td>승희</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">34J</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">25K</td></tr>
-        <tr onclick="openTicket(12)"><td style="text-align:center">12</td><td>황중일</td><td>중일</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">35K</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">25G</td></tr>
-        <tr onclick="openTicket(13)"><td style="text-align:center">13</td><td>정금자</td><td>금자</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">35J</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">25F</td></tr>
-        <tr onclick="openTicket(14)"><td style="text-align:center">14</td><td>김채은</td><td>채은</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">35H</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">25D</td></tr>
-        <tr onclick="openTicket(15)"><td style="text-align:center">15</td><td>김무성</td><td>무성</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">33A</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">25A</td></tr>
-        <tr onclick="openTicket(16)"><td style="text-align:center">16</td><td>김경애</td><td>경애</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 721</td><td class="mono">인천 T2</td><td class="mono">09:00</td><td class="mono">34H</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">25E</td></tr>
-        <tr onclick="openTicket(17)" style="background:#f0f8ff"><td style="text-align:center">17</td><td class="hl">최운화</td><td>운화</td><td style="white-space:nowrap"><span class="badge bp">에어프레미아</span></td><td class="mono">YP 801</td><td class="mono">인천 T1</td><td class="mono">09:15</td><td class="pending">현장배정</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">23G</td></tr>
-        <tr onclick="openTicket(18)" style="background:#f0f8ff"><td style="text-align:center">18</td><td class="hl">김인자</td><td>인자</td><td style="white-space:nowrap"><span class="badge bp">에어프레미아</span></td><td class="mono">YP 801</td><td class="mono">인천 T1</td><td class="mono">09:15</td><td class="pending">현장배정</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">23F</td></tr>
-        <tr onclick="openTicket(19)" style="background:#f0f8ff"><td style="text-align:center">19</td><td class="hl">김명순</td><td>명순</td><td style="white-space:nowrap"><span class="badge bp">에어프레미아</span></td><td class="mono">YP 801</td><td class="mono">인천 T1</td><td class="mono">09:15</td><td class="pending">현장배정</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">23E</td></tr>
-        <tr onclick="openTicket(20)" style="background:#f0f8ff"><td style="text-align:center">20</td><td class="hl">주재순</td><td>재순</td><td style="white-space:nowrap"><span class="badge bp">에어프레미아</span></td><td class="mono">YP 801</td><td class="mono">인천 T1</td><td class="mono">09:15</td><td class="pending">현장배정</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">23D</td></tr>
-        <tr onclick="openTicket(21)" style="background:#f0f8ff"><td style="text-align:center">21</td><td class="hl">박평심</td><td>평심</td><td style="white-space:nowrap"><span class="badge bp">에어프레미아</span></td><td class="mono">YP 801</td><td class="mono">인천 T1</td><td class="mono">09:15</td><td class="pending">현장배정</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">23C</td></tr>
-        <tr onclick="openTicket(22)" style="background:#f0f8ff"><td style="text-align:center">22</td><td class="hl">김수영</td><td>수영</td><td style="white-space:nowrap"><span class="badge bp">에어프레미아</span></td><td class="mono">YP 801</td><td class="mono">인천 T1</td><td class="mono">09:15</td><td class="pending">현장배정</td><td style="white-space:nowrap"><span class="badge ba">아시아나</span></td><td class="mono">OZ 746</td><td class="mono">홍콩 T1</td><td class="mono">01:40</td><td class="mono">06:20 T2</td><td class="mono">23A</td></tr>
-      </tbody>
-    </table>
-    </div>
-    <div class="checkin-box" style="margin-top:14px">
-      📌 <strong>체크인 안내</strong> · 아시아나 OZ721 — 인천 <strong>T2</strong> G/H/J 카운터 · 에어프레미아 YP801 — 인천 <strong>T1</strong> C카운터 (3번 출입구 방향) <strong>08:15 마감</strong> · 귀국편 OZ746 — 홍콩 T1 → 인천 T2 도착
-    </div>
+    <div class="sec-title"><span class="ico">📋</span><h2>최종 탑승 정보</h2></div>
+    <p style="font-size:13px;color:#64748b;text-align:center;padding:20px">data.js 기준으로 boarding.js가 렌더링합니다</p>
   </div>
 
   <!-- 홍콩 맛집 -->
   <div class="section popup-section" id="food">
     <div class="sec-title"><span class="ico">🍜</span><h2>홍콩 공항 &amp; 시내 맛집</h2></div>
-    <p style="font-size:14px;color:#64748b;margin-bottom:16px">홍콩은 세계 최고 공항 다이닝으로 유명합니다. 공항 안팎으로 즐길 수 있는 맛집을 정리했어요.</p>
-    <div style="font-size:13px;font-weight:700;color:#1e5fd4;margin-bottom:10px">🛫 홍콩 국제공항 내 (T1 출발층)</div>
-    <div class="food-grid" style="margin-bottom:20px">
-      <div class="food-card"><div class="fn">Crystal Jade</div><div class="ft">딤섬 · 중식</div><div class="fd">탄탄멘과 샤오롱바오가 유명. 검은 간장 딤섬은 꼭 맛볼 것. T1 중심부 위치.</div><div class="fp">💰 HK$80–150/인</div></div>
-      <div class="food-card"><div class="fn">완탕면 전문점</div><div class="ft">완탕면 · 미슐랭 ⭐</div><div class="fd">미슐랭 원스타 완탕면. 쫄깃한 계란면에 새우 완탕이 가득. 소고기 우볶음면도 인기.</div><div class="fp">💰 HK$60–100/인</div></div>
-      <div class="food-card"><div class="fn">맥도날드 (24시간)</div><div class="ft">패스트푸드</div><div class="fd">T1 출발층 L8. 24시간 영업. 코코넛 밀크 커피라떼와 초콜릿 파이가 특별 메뉴.</div><div class="fp">💰 HK$40–80/인</div></div>
-    </div>
-    <div style="font-size:13px;font-weight:700;color:#0e8a7c;margin-bottom:10px">🏙 홍콩 시내 추천</div>
+    <p style="font-size:14px;color:#64748b;margin-bottom:16px">홍콩은 세계 최고 공항 다이닝으로 유명합니다.</p>
     <div class="food-grid">
-      <div class="food-card"><div class="fn">팀호완</div><div class="ft">딤섬 · 미슐랭 ⭐</div><div class="fd">세계 최저가 미슐랭 딤섬. 차슈바오, 하가우, 슈마이가 대표 메뉴. 오픈런 추천.</div><div class="fp">📍 몽콕 · 💰 HK$30–80/인</div></div>
-      <div class="food-card"><div class="fn">호흥기</div><div class="ft">완탕면</div><div class="fd">전통 광둥식 완탕면. 탱글탱글한 새우 완탕과 향긋한 국물. XO 소스 볶음면도 강추.</div><div class="fp">📍 센트럴 · 💰 HK$60–120/인</div></div>
-      <div class="food-card"><div class="fn">Australian Milk Company</div><div class="ft">차찬탱 · 홍콩식 카페</div><div class="fd">스크램블 에그 샌드위치 세트. 홍콩 밀크티 필수. 목요일 휴무.</div><div class="fp">📍 조던 · 💰 HK$35–60/인</div></div>
-      <div class="food-card"><div class="fn">에그와플 노점</div><div class="ft">길거리 디저트</div><div class="fd">홍콩 대표 길거리 음식. 갓 구운 계란빵 모양 와플. 센트럴 · 침사추이 골목에서 찾기.</div><div class="fp">📍 침사추이 · 💰 HK$20–30</div></div>
-      <div class="food-card"><div class="fn">어묵 카레 (피시볼)</div><div class="ft">길거리 음식</div><div class="fd">카레 소스에 담긴 어묵볼. 홍콩 대표 길거리 스낵. 매콤한 스페셜 카레 소스가 핵심.</div><div class="fp">📍 전 지역 · 💰 HK$15–25</div></div>
-      <div class="food-card"><div class="fn">에그타르트</div><div class="ft">베이커리 · 디저트</div><div class="fd">홍콩 필수 디저트. 포르투갈식 에그타르트와 달리 부드럽고 달콤한 홍콩식. 따뜻할 때 즉시 먹을 것.</div><div class="fp">📍 전 지역 · 💰 HK$8–15</div></div>
-    </div>
-    <div style="margin-top:14px;background:#e8effe;border-radius:8px;padding:12px 16px;font-size:13px;color:#1e3a7a">
-      💡 <strong>TIP</strong> · 홍콩 공항 내 식당은 출국 심사 이전 구역(1층 도착층)이 더 저렴합니다 · 옥토퍼스카드로 시내 음식점 결제 가능 · 딤섬은 점심시간(11~14시) 이용 추천
+      <div class="food-card"><div class="fn">팀호완</div><div class="ft">딤섬 · 미슐랭 ⭐</div><div class="fd">세계 최저가 미슐랭 딤섬. 차슈바오, 하가우, 슈마이가 대표 메뉴.</div><div class="fp">📍 몽콕 · 💰 HK$30–80/인</div></div>
+      <div class="food-card"><div class="fn">호흥기</div><div class="ft">완탕면</div><div class="fd">전통 광둥식 완탕면. 탱글탱글한 새우 완탕과 향긋한 국물.</div><div class="fp">📍 센트럴 · 💰 HK$60–120/인</div></div>
+      <div class="food-card"><div class="fn">Australian Milk Company</div><div class="ft">차찬탱</div><div class="fd">스크램블 에그 샌드위치 세트. 홍콩 밀크티 필수.</div><div class="fp">📍 조던 · 💰 HK$35–60/인</div></div>
     </div>
   </div>
-
-
-
 
   <!-- 사진첩 -->
   <div class="section popup-section" id="photos">
     <div class="sec-title"><span class="ico">📸</span><h2>사진첩</h2></div>
-    <div style="text-align:center;padding:16px 0 8px">
-      <div style="font-size:60px;margin-bottom:16px">📁</div>
-      <h3 style="font-family:Barlow,sans-serif;font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:8px">ONCHAIN 2140 홍콩 크루즈 사진첩</h3>
-      <p style="font-size:14px;color:var(--gray);margin-bottom:24px;line-height:1.7">연수 사진들이 구글 드라이브에 저장되어 있어요.<br>아래 버튼을 눌러 확인하고 원하는 사진을 저장하세요!</p>
-    </div>
-
-    <!-- 구글 드라이브 버튼 -->
     <a href="https://drive.google.com/drive/folders/1gbYOYqVIly3VCg64E8NdWXML4tEmKUDE" target="_blank"
-      style="display:flex;align-items:center;gap:14px;background:#1a73e8;border-radius:12px;padding:16px 20px;margin-bottom:20px;text-decoration:none;transition:.2s"
-      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      style="display:flex;align-items:center;gap:14px;background:#1a73e8;border-radius:12px;padding:16px 20px;margin-bottom:20px;text-decoration:none">
       <span style="font-size:28px">📂</span>
       <div>
         <div style="font-size:15px;font-weight:800;color:#fff">구글 드라이브 사진첩 열기</div>
@@ -652,34 +514,22 @@
       </div>
       <span style="margin-left:auto;font-size:20px;color:#fff">→</span>
     </a>
-
-    <!-- 다운로드 방법 -->
-    <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px">
-      <div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:14px">📥 사진 다운로드 방법</div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">1</span>
-          <div style="font-size:13px;color:var(--text2);line-height:1.6">위 버튼을 눌러 <strong>구글 드라이브</strong>로 이동</div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">2</span>
-          <div style="font-size:13px;color:var(--text2);line-height:1.6">원하는 사진을 <strong>길게 누르기</strong> (모바일) 또는 <strong>우클릭</strong> (PC)</div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">3</span>
-          <div style="font-size:13px;color:var(--text2);line-height:1.6"><strong>다운로드</strong> 선택 → 내 기기에 저장</div>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          <span style="background:var(--teal);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">💡</span>
-          <div style="font-size:13px;color:var(--text2);line-height:1.6"><strong>전체 다운로드</strong>는 우측 상단 <strong>⋮ → 다운로드</strong> 선택하면 폴더 전체를 zip 파일로 받을 수 있어요</div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- 크루즈 정보 -->
   <div class="section popup-section" id="cruise">
     <div class="sec-title"><span class="ico">🚢</span><h2>크루즈 정보</h2></div>
+
+    <!-- ▼▼ 구랑위호 인터랙티브 배치도 버튼 ▼▼ -->
+    <button onclick="openCruiseMap()"
+      style="width:100%;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#0a1628,#002868);border:none;border-radius:14px;padding:16px 18px;margin-bottom:14px;cursor:pointer;font-family:inherit;text-align:left">
+      <span style="font-size:28px">🗺</span>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:700;color:#fff">구랑위호 인터랙티브 배치도</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px">데크별 객실·시설 위치 보기</div>
+      </div>
+      <span style="font-size:20px;color:rgba(255,255,255,.6)">→</span>
+    </button>
 
     <!-- 선박 기본 -->
     <div style="background:linear-gradient(135deg,#0a1628,#002868);border-radius:16px;padding:18px 20px;margin-bottom:14px;color:#fff">
@@ -720,23 +570,10 @@
     <div style="background:#f0fdf4;border-radius:14px;padding:16px;margin-bottom:12px">
       <div style="font-size:13px;font-weight:800;color:#0f2044;margin-bottom:10px">📶 선내 Wi-Fi 요금 (2박 3일)</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        <div style="background:#fff;border:1.5px solid #86efac;border-radius:10px;padding:10px;text-align:center">
-          <div style="font-size:10px;color:#64748b;margin-bottom:3px">2GB 고속</div>
-          <div style="font-size:9px;text-decoration:line-through;color:#94a3b8">$66</div>
-          <div style="font-size:18px;font-weight:900;color:#0e8a7c">$45</div>
-        </div>
-        <div style="background:#fff;border:1.5px solid #86efac;border-radius:10px;padding:10px;text-align:center">
-          <div style="font-size:10px;color:#64748b;margin-bottom:3px">4GB 고속</div>
-          <div style="font-size:9px;text-decoration:line-through;color:#94a3b8">$132</div>
-          <div style="font-size:18px;font-weight:900;color:#0e8a7c">$88</div>
-        </div>
-        <div style="background:#fff;border:1.5px solid #86efac;border-radius:10px;padding:10px;text-align:center">
-          <div style="font-size:10px;color:#64748b;margin-bottom:3px">999분</div>
-          <div style="font-size:9px;text-decoration:line-through;color:#94a3b8">$999</div>
-          <div style="font-size:18px;font-weight:900;color:#0e8a7c">$118</div>
-        </div>
+        <div style="background:#fff;border:1.5px solid #86efac;border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:#64748b;margin-bottom:3px">2GB 고속</div><div style="font-size:18px;font-weight:900;color:#0e8a7c">$45</div></div>
+        <div style="background:#fff;border:1.5px solid #86efac;border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:#64748b;margin-bottom:3px">4GB 고속</div><div style="font-size:18px;font-weight:900;color:#0e8a7c">$88</div></div>
+        <div style="background:#fff;border:1.5px solid #86efac;border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:#64748b;margin-bottom:3px">999분</div><div style="font-size:18px;font-weight:900;color:#0e8a7c">$118</div></div>
       </div>
-      <div style="font-size:10px;color:#64748b;margin-top:8px">※ 실제 요금은 선내 안내 기준 / 단위: USD</div>
     </div>
 
     <!-- 결제 -->
@@ -808,7 +645,7 @@
       </div>
     </div>
 
-    <!-- 선내 온도 & 준비물 -->
+    <!-- 선내 온도 -->
     <div style="background:#eff6ff;border-left:4px solid #3b82f6;border-radius:0 12px 12px 0;padding:14px;margin-bottom:12px">
       <div style="font-size:12px;font-weight:800;color:#1e40af;margin-bottom:8px">🧥 선내 온도 안내</div>
       <div style="font-size:12px;color:#374151;line-height:1.8">
@@ -817,26 +654,12 @@
       </div>
     </div>
 
-    <!-- 개인 준비물 -->
-    <div style="background:#f0fdf4;border-radius:14px;padding:16px;margin-bottom:12px">
-      <div style="font-size:13px;font-weight:800;color:#0f2044;margin-bottom:8px">🎒 개인 준비물 체크리스트</div>
-      <div style="font-size:12px;color:#374151;line-height:1.9">
-        <div style="margin-bottom:6px"><span style="color:#0e8a7c;font-weight:700">✅ 선내 구비 (가져오지 않아도 됨)</span><br>
-        수건 · 비누 · 티슈</div>
-        <div style="margin-bottom:6px"><span style="color:#d97706;font-weight:700">⚠️ 개인 지참 필요</span><br>
-        컨디셔너 · 칫솔 · 치약 · 면도기 · 빗 · 여성용품</div>
-        <div><span style="color:#dc2626;font-weight:700">💊 상비약 (반드시 준비)</span><br>
-        개인 복용약 · 소화제 · 해열제 · 지사제 · <strong>멀미약</strong></div>
-      </div>
-    </div>
-
     <!-- 크루즈 부두 정보 -->
     <div style="background:#f0f4ff;border-radius:14px;padding:16px">
       <div style="font-size:13px;font-weight:800;color:#0f2044;margin-bottom:10px">⚓ 크루즈 항구 정보</div>
       <div style="font-size:12px;color:#374151;line-height:1.9;margin-bottom:12px">
         <div style="font-weight:700;color:#1e5fd4;margin-bottom:2px">부두명</div>
-        启德邮轮码头<br>
-        Kai Tak Cruise Terminal<br><br>
+        启德邮轮码头 · Kai Tak Cruise Terminal<br><br>
         <div style="font-weight:700;color:#1e5fd4;margin-bottom:2px">주소 (영문)</div>
         33 Shing Fung Road, Kai Tak, Kowloon, Hong Kong<br><br>
         <div style="font-weight:700;color:#1e5fd4;margin-bottom:2px">주소 (중문)</div>
@@ -849,7 +672,7 @@
     </div>
   </div>
 
-  <!-- 여행 팁 + 주의사항 -->
+  <!-- 여행 팁 -->
   <div class="section popup-section" id="tips">
     <div class="sec-title"><span class="ico">💡</span><h2>홍콩 여행 팁 &amp; 주의사항</h2></div>
     <div class="info-grid">
@@ -857,150 +680,56 @@
         <div class="info-head red">⚠️ 꼭 알아야 할 주의사항</div>
         <div class="info-body">
           <ul class="warn-list">
-            <li><span class="wi">🚭</span><div><strong>흡연 엄격 금지 (2026년 강화)</strong> — 지정 구역 외 흡연 시 HK$5,000 벌금. 식당·쇼핑몰·공공장소·대기줄 전면 금연. 담배 19개비 이상 반입 시에도 벌금.</div></li>
-            <li><span class="wi">🚶</span><div><strong>에스컬레이터 우측 통행</strong> — 좌측은 보행자 통로. 지하철역에서 반드시 지킬 것.</div></li>
-            <li><span class="wi">🌡️</span><div><strong>실내 냉방 매우 강함</strong> — 건물 내부 15~20℃ 수준. 얇은 긴소매 또는 가디건 필수 지참.</div></li>
-            <li><span class="wi">💳</span><div><strong>현금+카드 병행</strong> — 소규모 식당·야시장은 현금만 가능. HKD 소액권 미리 준비. 대형 쇼핑몰은 카드·알리페이·위챗페이 가능.</div></li>
-            <li><span class="wi">📱</span><div><strong>인터넷 자유</strong> — 홍콩은 중국 본토와 달리 유튜브·구글·인스타 자유롭게 사용 가능. VPN 불필요.</div></li>
-            <li><span class="wi">🚕</span><div><strong>택시 팁</strong> — 미터기 사용 의무. 공항→시내 레드 택시. 트렁크 짐칸 이용 시 추가 요금. 일부 택시만 카드 가능.</div></li>
-            <li><span class="wi">⚡</span><div><strong>전압·콘센트</strong> — 영국식 3구 콘센트 (220V). 한국 어댑터 필수. USB 허브 챙기면 편리.</div></li>
-            <li><span class="wi">🌊</span><div><strong>크루즈 멀미</strong> — 남중국해 항해 중 파도가 있을 수 있음. 멀미약 챙겨오는 것을 강력 권장.</div></li>
-            <li><span class="wi">🚇</span><div><strong>MTR 화장실 없음</strong> — 지하철역 내 화장실 없음. 스타벅스·맥도날드·쇼핑몰 화장실 이용.</div></li>
+            <li><span class="wi">🚭</span><div><strong>흡연 엄격 금지</strong> — 지정 구역 외 흡연 시 HK$5,000 벌금.</div></li>
+            <li><span class="wi">🌡️</span><div><strong>실내 냉방 매우 강함</strong> — 건물 내부 15~20℃ 수준. 얇은 긴소매 필수.</div></li>
+            <li><span class="wi">📱</span><div><strong>인터넷 자유</strong> — 홍콩은 유튜브·구글·인스타 자유롭게 사용 가능.</div></li>
+            <li><span class="wi">🌊</span><div><strong>크루즈 멀미</strong> — 멀미약 챙겨오는 것을 강력 권장.</div></li>
           </ul>
         </div>
       </div>
       <div class="info-card">
         <div class="info-head blue">📱 홍콩 필수 정보</div>
         <div class="info-body">
-          <div class="info-item"><span class="ico2">💰</span><div><strong>환전</strong> — 1 HKD ≈ 192원 (2026년 3월 기준). 공항보다 <strong>침사추이·센트럴 시내 환전소</strong>가 환율 유리. HKD는 마카오에서도 통용.</div></div>
-          <div class="info-item"><span class="ico2">📶</span><div><strong>유심/eSIM</strong> — 한국 출발 전 eSIM(Airalo·Nomad) 미리 구매 추천. 현지 공항 도착층 7-Eleven·Circle K·통신사 부스에서도 구매 가능. 3일 무제한 HK$38~58.</div></div>
-          <div class="info-item"><span class="ico2">🚇</span><div><strong>옥토퍼스카드</strong> — 홍콩 필수 교통카드. 지하철(MTR)·버스·트램·페리·편의점·식당 결제까지 가능. 공항 MTR 서비스센터에서 구매 (보증금 포함 HK$150). 귀국 시 잔액 환불 가능.</div></div>
-          <div class="info-item"><span class="ico2">⏰</span><div><strong>시차</strong> — 한국보다 1시간 느림 (UTC+8). 한국 12:00 = 홍콩 11:00.</div></div>
-          <div class="info-item"><span class="ico2">🏥</span><div><strong>긴급 연락처</strong> — 경찰/앰뷸런스: <strong>999</strong>. 관광경찰: <strong>2527-7177</strong>. 주홍콩 한국 영사관: <strong>2529-4141</strong>.</div></div>
-          <div class="info-item"><span class="ico2">🌤️</span><div><strong>4월 홍콩 날씨</strong> — 평균 24~28℃. 습도 높고 간간이 소나기. 우산·방수 점퍼 챙길 것. 실내는 냉방이 강해 겉옷 필수.</div></div>
-          <div class="info-item"><span class="ico2">🛍️</span><div><strong>쇼핑·결제</strong> — 홍콩은 무관세. 침사추이·몽콕·센트럴 주요 쇼핑지. 대부분 비자카드·알리페이·위챗페이 결제 가능. 버스는 VISA 컨택리스 카드 사용 가능.</div></div>
-          <div class="info-item"><span class="ico2">🗣️</span><div><strong>유용한 광둥어</strong> — <strong>음꼬이(唔該)</strong>: 감사합니다/실례합니다. <strong>도제(多謝)</strong>: 고맙습니다. <strong>레이호(你好)</strong>: 안녕하세요.</div></div>
-        </div>
-      </div>
-      <div class="info-card">
-        <div class="info-head green">💱 환전 &amp; 유심 위치 안내</div>
-        <div class="info-body">
-          <div class="info-item"><span class="ico2">🏦</span><div><strong>인천공항 환전</strong><br>· T1: 1층 입국장 및 3층 출발층 은행/환전소<br>· T2: 3층 출발층 중앙 환전소<br>· <small style="color:#64748b">공항 환율은 시중보다 불리 → 소액만 환전 권장</small></div></div>
-          <div class="info-item"><span class="ico2">📶</span><div><strong>인천공항 유심/로밍</strong><br>· T1·T2 3층: SKT·KT·LG U+ 로밍센터 (출국장 진입 전)<br>· 로밍: 하루 약 1만원 / 데이터 무제한<br>· eSIM: 출발 전 앱에서 미리 구매가 더 저렴</div></div>
-          <div class="info-item"><span class="ico2">📍</span><div><strong>홍콩 시내 환전 명소</strong><br>· <strong>침사추이 하버시티 인근</strong> — 환전소 밀집, 경쟁으로 환율 좋음<br>· <strong>센트럴(金鐘·Admiralty)</strong> 인근도 환율 유리<br>· 공항 도착층 TRAVELEX는 편리하나 환율 불리</div></div>
-          <div class="info-item"><span class="ico2">🚆</span><div><strong>공항→시내 이동</strong><br>· <strong>AEL 공항철도</strong> — 가장 빠름. 홍콩역까지 약 24분. 온라인 예매 추천<br>· <strong>버스 A11/A21</strong> — 저렴하나 시간 소요<br>· <strong>택시</strong> — 시내까지 약 HK$300~400</div></div>
+          <div class="info-item"><span class="ico2">💰</span><div><strong>환전</strong> — 1 HKD ≈ 192원. 침사추이·센트럴 시내 환전소가 환율 유리.</div></div>
+          <div class="info-item"><span class="ico2">🚇</span><div><strong>옥토퍼스카드</strong> — 홍콩 필수 교통카드. 지하철·버스·편의점 결제까지 가능.</div></div>
+          <div class="info-item"><span class="ico2">⏰</span><div><strong>시차</strong> — 한국보다 1시간 느림 (UTC+8).</div></div>
+          <div class="info-item"><span class="ico2">🏥</span><div><strong>긴급 연락처</strong> — 경찰/앰뷸런스: <strong>999</strong>. 주홍콩 한국 영사관: <strong>2529-4141</strong>.</div></div>
         </div>
       </div>
     </div>
   </div>
 
-
-  <!-- 여행지 TOP 10 -->
+  <!-- 관광지 TOP 15 -->
   <div class="section" id="attractions">
     <div class="sec-title"><span class="ico">🏙️</span><h2>홍콩 대표 관광지 TOP 15</h2></div>
-    <p style="font-size:14px;color:#64748b;margin-bottom:18px">하루밖에 없지만 알아두면 더 알차게 즐길 수 있어요! 장소를 누르면 사진을 볼 수 있습니다.</p>
+    <p style="font-size:14px;color:#64748b;margin-bottom:18px">하루밖에 없지만 알아두면 더 알차게 즐길 수 있어요!</p>
     <div class="att-grid" id="attGrid"></div>
   </div>
-
 
   <!-- 환율 계산기 -->
   <div class="section popup-section" id="exchange">
     <div class="sec-title"><span class="ico">💱</span><h2>홍콩달러 환율 계산기</h2></div>
-    <p style="font-size:13px;color:#94a3b8;margin-bottom:16px">※ 참고용 대략값입니다 · 실제 환율과 다를 수 있어요 (기준: HKD 1 ≈ 192원)</p>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:16px">※ 참고용 대략값 · 기준: HKD 1 ≈ 192원</p>
     <div class="calc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div style="background:var(--blue-light);border:1.5px solid var(--blue);border-radius:10px;padding:18px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <label style="font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.08em;text-transform:uppercase">HKD → 원화</label>
-          <button onclick="resetHKD()" title="초기화" style="background:none;border:1px solid rgba(30,95,212,.3);border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer;color:var(--blue);line-height:1.4;transition:.15s" onmouseover="this.style.background='var(--blue-light)'" onmouseout="this.style.background='none'">↺ 초기화</button>
+          <label style="font-size:12px;font-weight:700;color:var(--blue)">HKD → 원화</label>
+          <button onclick="resetHKD()" style="background:none;border:1px solid rgba(30,95,212,.3);border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer;color:var(--blue)">↺</button>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <input type="number" id="hkdInput2" placeholder="0" oninput="calcHKD()"
-            style="flex:1;border:1.5px solid var(--blue);border-radius:8px;padding:10px 14px;font-size:18px;font-weight:700;font-family:Barlow,sans-serif;color:var(--navy);background:#fff;outline:none;width:100%">
-          <span style="font-size:15px;font-weight:700;color:var(--blue);white-space:nowrap">HKD</span>
-        </div>
-        <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:Barlow,sans-serif" id="krwResult">— 원</div>
+        <input type="number" id="hkdInput2" placeholder="0" oninput="calcHKD()"
+          style="width:100%;border:1.5px solid var(--blue);border-radius:8px;padding:10px 14px;font-size:18px;font-weight:700;color:var(--navy);background:#fff;outline:none;box-sizing:border-box">
+        <div style="font-size:22px;font-weight:800;color:var(--navy);margin-top:8px" id="krwResult">— 원</div>
       </div>
       <div style="background:#fdf3dc;border:1.5px solid var(--gold);border-radius:10px;padding:18px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <label style="font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase">원화 → HKD</label>
-          <button onclick="resetKRW()" title="초기화" style="background:none;border:1px solid rgba(200,155,42,.4);border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer;color:var(--gold);line-height:1.4;transition:.15s" onmouseover="this.style.background='#fdf3dc'" onmouseout="this.style.background='none'">↺ 초기화</button>
+          <label style="font-size:12px;font-weight:700;color:var(--gold)">원화 → HKD</label>
+          <button onclick="resetKRW()" style="background:none;border:1px solid rgba(200,155,42,.4);border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer;color:var(--gold)">↺</button>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <input type="number" id="krwInput2" placeholder="0" oninput="calcKRW()"
-            style="flex:1;border:1.5px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:18px;font-weight:700;font-family:Barlow,sans-serif;color:var(--navy);background:#fff;outline:none;width:100%">
-          <span style="font-size:15px;font-weight:700;color:var(--gold);white-space:nowrap">원</span>
-        </div>
-        <div style="font-size:22px;font-weight:800;color:var(--navy);font-family:Barlow,sans-serif" id="hkdResult">— HKD</div>
+        <input type="number" id="krwInput2" placeholder="0" oninput="calcKRW()"
+          style="width:100%;border:1.5px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:18px;font-weight:700;color:var(--navy);background:#fff;outline:none;box-sizing:border-box">
+        <div style="font-size:22px;font-weight:800;color:var(--navy);margin-top:8px" id="hkdResult">— HKD</div>
       </div>
     </div>
-    <!-- 인천공항 T2 환전소 안내 -->
-    <div style="background:linear-gradient(135deg,#0a1628,#1e3a6e);border-radius:14px;padding:16px;margin-top:14px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:900;color:#f0cc6a;margin-bottom:10px">🏦 인천공항 T2 환전소 안내</div>
-      <!-- 동선 -->
-      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:10px">
-        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:8px;letter-spacing:.06em">추천 동선</div>
-        <div style="font-size:12px;color:#fff;line-height:2">
-          공항 1층 도착<br>
-          <span style="color:#94a3b8">↓ 엘리베이터/에스컬레이터</span><br>
-          <b>3층 출국장 (Departure)</b><br>
-          <span style="color:#94a3b8">↓ 체크인 구역 직진</span><br>
-          <b>우리은행 / 국민은행 24시간 부스</b><br>
-          <span style="color:#94a3b8">↓ 환전 후</span><br>
-          체크인 → 보안검색 → 게이트
-        </div>
-      </div>
-      <!-- 은행별 위치 -->
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:12px;border-left:3px solid #4dabf7">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-size:12px;font-weight:800;color:#fff">🏦 우리은행</div>
-              <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">3층 출국장 H 체크인 · 4번 출입구 D카운터 앞</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:10px;color:#4dabf7;font-weight:700">24시간</div>
-              <div style="font-size:10px;color:#f0cc6a">⭐ 최추천</div>
-            </div>
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:12px;border-left:3px solid #ffd43b">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-size:12px;font-weight:800;color:#fff">🏦 국민은행</div>
-              <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">3층 출국장 H·K 체크인 구역 사이 (부스 多)</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:10px;color:#4dabf7;font-weight:700">24시간</div>
-              <div style="font-size:10px;color:#94a3b8">대기 짧음</div>
-            </div>
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:12px;border-left:3px solid #69db7c">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-size:12px;font-weight:800;color:#fff">🏦 하나은행</div>
-              <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">3층 출국장 K 체크인 카운터 근처</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:10px;color:#ffa94d;font-weight:700">06:00~22:00</div>
-              <div style="font-size:10px;color:#94a3b8">평일 주간</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- 팁 -->
-      <div style="margin-top:10px;background:rgba(255,202,34,.12);border:1px solid rgba(255,202,34,.3);border-radius:8px;padding:10px">
-        <div style="font-size:11px;color:#f0cc6a;font-weight:700;margin-bottom:4px">💡 환전 팁</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.8);line-height:1.8">
-          • 여권 + 현금 준비 → "홍콩달러로 환전"<br>
-          • 추천 금액: <b style="color:#f0cc6a">3,000~5,000 HKD</b><br>
-          • 새벽 시간 대기: 5~15분 예상<br>
-          • 공항보다 홍콩 시내 환율이 유리 (소액만 환전 권장)
-        </div>
-      </div>
-    </div>
-
-    <!-- 빠른 환산표 -->
     <div style="margin-top:14px;overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:14px;border-radius:8px;overflow:hidden">
         <thead>
@@ -1012,41 +741,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr style="background:#f8fafd;border-bottom:1px solid var(--border)">
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">10</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">1,920원</td>
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">200</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">38,400원</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">30</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">5,760원</td>
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">300</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">57,600원</td>
-          </tr>
-          <tr style="background:#f8fafd;border-bottom:1px solid var(--border)">
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">50</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">9,600원</td>
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">500</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">96,000원</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">100</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">19,200원</td>
-            <td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--blue)">1,000</td>
-            <td style="padding:8px 14px;text-align:center;font-family:Barlow,sans-serif;font-weight:600">192,000원</td>
-          </tr>
+          <tr style="background:#f8fafd"><td style="padding:8px;text-align:center;font-weight:700;color:var(--blue)">10</td><td style="padding:8px;text-align:center">1,920원</td><td style="padding:8px;text-align:center;font-weight:700;color:var(--blue)">200</td><td style="padding:8px;text-align:center">38,400원</td></tr>
+          <tr><td style="padding:8px;text-align:center;font-weight:700;color:var(--blue)">50</td><td style="padding:8px;text-align:center">9,600원</td><td style="padding:8px;text-align:center;font-weight:700;color:var(--blue)">500</td><td style="padding:8px;text-align:center">96,000원</td></tr>
+          <tr style="background:#f8fafd"><td style="padding:8px;text-align:center;font-weight:700;color:var(--blue)">100</td><td style="padding:8px;text-align:center">19,200원</td><td style="padding:8px;text-align:center;font-weight:700;color:var(--blue)">1,000</td><td style="padding:8px;text-align:center">192,000원</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-
   <!-- 커뮤니티 게시판 -->
   <div class="section" id="community">
-    <div class="sec-title"><span class="ico">💬</span><h2>커뮤니티 — 투표 & 방명록</h2></div>
-
-    <!-- 로그인 닉네임 고정 표시 -->
+    <div class="sec-title"><span class="ico">💬</span><h2>커뮤니티 — 투표 &amp; 방명록</h2></div>
     <div style="background:var(--blue-light);border:1.5px solid var(--blue);border-radius:10px;padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;gap:12px">
       <div style="width:40px;height:40px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👤</div>
       <div>
@@ -1055,41 +760,25 @@
       </div>
       <div style="margin-left:auto;background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.04em">MY</div>
     </div>
-
-    <!-- 안건 투표 -->
     <div style="margin-bottom:28px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
         <div>
           <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:2px">🗳️ 안건 투표</h3>
           <p style="font-size:13px;color:var(--gray)">안건을 제시하고 찬성 / 반대로 투표해요</p>
         </div>
-        <button onclick="openNewPoll()"
-          style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">
-          + 안건 올리기
-        </button>
+        <button onclick="openNewPoll()" style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">+ 안건 올리기</button>
       </div>
-      <div id="pollList">
-        <div class="msg-empty">아직 등록된 안건이 없어요.<br>+ 안건 올리기를 눌러 의견을 제시해보세요!</div>
-      </div>
+      <div id="pollList"><div class="msg-empty">아직 등록된 안건이 없어요.<br>+ 안건 올리기를 눌러 의견을 제시해보세요!</div></div>
     </div>
-
-    <!-- 방명록 -->
     <div>
-      <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px">✍️ 방명록 & 자유 의견</h3>
+      <h3 style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px">✍️ 방명록 &amp; 자유 의견</h3>
       <p style="font-size:13px;color:var(--gray);margin-bottom:14px">자유롭게 글을 남겨주세요 😊</p>
-      <div class="msg-list" id="msgList">
-        <div class="msg-empty">아직 작성된 글이 없어요.<br>첫 번째 글을 남겨보세요!</div>
-      </div>
+      <div class="msg-list" id="msgList"><div class="msg-empty">아직 작성된 글이 없어요.<br>첫 번째 글을 남겨보세요!</div></div>
       <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
         <textarea id="msgText" placeholder="자유롭게 글을 남겨주세요..." rows="3"
           style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;line-height:1.7;outline:none;color:var(--text);background:var(--white);box-sizing:border-box;transition:.2s"
           onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-
-        <button onclick="submitMsg()"
-          style="width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s"
-          onmouseover="this.style.background='var(--blue)'" onmouseout="this.style.background='var(--navy)'">
-          ✉️ 글 남기기
-        </button>
+        <button onclick="submitMsg()" style="width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s" onmouseover="this.style.background='var(--blue)'" onmouseout="this.style.background='var(--navy)'">✉️ 글 남기기</button>
       </div>
     </div>
   </div>
@@ -1117,7 +806,6 @@
           <div class="checklist-item"><input type="checkbox" id="c8" onchange="toggleDone(this)"><label for="c8">보조배터리 (기내 수하물만 가능)</label></div>
           <div class="checklist-item"><input type="checkbox" id="c9" onchange="toggleDone(this)"><label for="c9">멀티탭 또는 USB 충전 허브</label></div>
           <div class="checklist-item"><input type="checkbox" id="c10" onchange="toggleDone(this)"><label for="c10">유심 또는 eSIM 준비</label></div>
-          <div class="checklist-item"><input type="checkbox" id="c11" onchange="toggleDone(this)"><label for="c11">이어폰 / 노이즈캔슬링 헤드셋</label></div>
         </div>
       </div>
       <div class="info-card">
@@ -1125,10 +813,9 @@
         <div class="info-body">
           <div class="checklist-item"><input type="checkbox" id="c12" onchange="toggleDone(this)"><label for="c12">가디건 / 얇은 긴소매 (실내 냉방 대비)</label></div>
           <div class="checklist-item"><input type="checkbox" id="c13" onchange="toggleDone(this)"><label for="c13">우산 또는 방수 점퍼</label></div>
-          <div class="checklist-item"><input type="checkbox" id="c14" onchange="toggleDone(this)"><label for="c14">편한 신발</label></div>
           <div class="checklist-item"><input type="checkbox" id="c15" onchange="toggleDone(this)"><label for="c15">슬리퍼 (크루즈 선내용)</label></div>
           <div class="checklist-item"><input type="checkbox" id="c16" onchange="toggleDone(this)"><label for="c16">행사용 단정한 의상 (컨퍼런스 착용)</label></div>
-          <div class="checklist-item"><input type="checkbox" id="c17" onchange="toggleDone(this)"><label for="c17">수영복 (크루즈 수영장 있을 경우)</label></div>
+          <div class="checklist-item"><input type="checkbox" id="c17" onchange="toggleDone(this)"><label for="c17">수영복 (크루즈 수영장)</label></div>
         </div>
       </div>
       <div class="info-card">
@@ -1145,8 +832,6 @@
     </div>
   </div>
 
-  
-
 <!-- ══ 모달: 안건 투표 ══ -->
 <div class="overlay" id="pollOverlay" onclick="closePollModal(event)">
   <div class="modal" style="max-width:480px">
@@ -1155,9 +840,7 @@
   </div>
 </div>
 
-
-
-<!-- ══ 탑승권 모달 (명단) ══ -->
+<!-- ══ 탑승권 모달 ══ -->
 <div class="overlay" id="memberBpOverlay" onclick="closeMemberBp(event)" style="z-index:99998">
   <div class="modal" style="max-width:440px;width:calc(100% - 32px);padding:0;background:transparent;box-shadow:none;overflow:hidden">
     <div id="memberBpContent"></div>
@@ -1173,7 +856,7 @@
   </div>
 </div>
 
-<!-- ══ 모달: 관리자 로그인 ══ -->
+<!-- ══ 관리자 로그인 ══ -->
 <div class="overlay" id="adminLoginOverlay" onclick="closeAdminLogin(event)" style="z-index:99998">
   <div class="modal" style="max-width:360px">
     <button class="modal-close" onclick="closeAll()">✕</button>
@@ -1184,26 +867,17 @@
         <p style="font-size:13px;color:var(--gray);margin-top:4px">관리자만 접근 가능합니다</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px">
-        <div>
-          <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px">아이디</label>
-          <input type="text" id="adminId" placeholder="아이디 입력"
-            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;transition:.2s"
-            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter')doAdminLogin()">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px">비밀번호</label>
-          <input type="password" id="adminPw" placeholder="비밀번호 입력"
-            style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;transition:.2s"
-            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"
-            onkeydown="if(event.key==='Enter')doAdminLogin()">
-        </div>
-        <div id="adminError" style="display:none;background:#fdeaea;border:1px solid #f5a0a0;border-radius:6px;padding:9px 14px;font-size:13px;color:#c0392b">
-          ❌ 아이디 또는 비밀번호가 올바르지 않습니다.
-        </div>
+        <input type="text" id="adminId" placeholder="아이디"
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;transition:.2s"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')doAdminLogin()">
+        <input type="password" id="adminPw" placeholder="비밀번호"
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;transition:.2s"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')doAdminLogin()">
+        <div id="adminError" style="display:none;background:#fdeaea;border:1px solid #f5a0a0;border-radius:6px;padding:9px 14px;font-size:13px;color:#c0392b">❌ 아이디 또는 비밀번호가 올바르지 않습니다.</div>
         <button onclick="doAdminLogin()"
-          style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px;transition:.2s"
-          onmouseover="this.style.background='#1e5fd4'" onmouseout="this.style.background='var(--navy)'">
+          style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px">
           로그인
         </button>
       </div>
@@ -1211,7 +885,7 @@
   </div>
 </div>
 
-<!-- ══ 모달: 관리자 패널 ══ -->
+<!-- ══ 관리자 패널 ══ -->
 <div class="overlay" id="adminPanelOverlay" onclick="closeAdminPanel(event)" style="z-index:99998">
   <div class="modal" style="max-width:960px">
     <button class="modal-close" onclick="closeAll();logoutAdmin()">✕</button>
@@ -1219,11 +893,9 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
         <div>
           <h2 style="font-family:Barlow,sans-serif;font-size:1.3rem;font-weight:700;color:var(--navy)">🔓 관리자 패널 — 탑승객 개인정보</h2>
-          <p style="font-size:13px;color:var(--gray);margin-top:3px">여권번호 · 생년월일 · 연락처 · 이메일</p>
+          <p style="font-size:13px;color:var(--gray);margin-top:3px">여권번호 · 생년월일 · 연락처</p>
         </div>
-        <button onclick="logoutAdmin()" style="background:#fdeaea;border:1px solid #f5a0a0;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#c0392b;cursor:pointer;font-family:inherit">
-          🔒 로그아웃
-        </button>
+        <button onclick="logoutAdmin()" style="background:#fdeaea;border:1px solid #f5a0a0;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;color:#c0392b;cursor:pointer;font-family:inherit">🔒 로그아웃</button>
       </div>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:800px">
@@ -1249,7 +921,7 @@
 <footer>
     ONCHAIN 2140 · 홍콩 크루즈 리더십 연수 · 2026<br>
     <span style="font-size:12px">일정은 현장 상황에 따라 조정될 수 있습니다</span>
-  </footer>
+</footer>
 </div>
 
 <!-- ══ 모달: 탑승권 ══ -->
@@ -1259,7 +931,6 @@
     <div id="ticketContent"></div>
   </div>
 </div>
-
 
 <!-- ══ 모달: 관광지 사진 ══ -->
 <div class="overlay" id="photoOverlay" onclick="closePhoto(event)">
@@ -1283,24 +954,18 @@
     <button class="modal-close" onclick="closeAll()">✕</button>
     <div style="padding:20px 20px 0">
       <h2 style="font-family:Barlow,sans-serif;font-size:1.3rem;font-weight:700;color:#d63b3b;margin-bottom:12px">🚨 비상연락망</h2>
-
-      <!-- 로밍 경고 -->
       <div style="background:#fff3cd;border:2px solid #ffc107;border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start">
         <span style="font-size:22px;flex-shrink:0">⚠️</span>
         <div>
           <div style="font-size:13px;font-weight:800;color:#856404;margin-bottom:3px">로밍 요금 주의! 꼭 읽어주세요</div>
           <div style="font-size:12px;color:#856404;line-height:1.6">
             홍콩 현지에서 아래 번호로 <strong>전화 통화 시 로밍 요금 발생</strong>합니다.<br>
-            로밍 미설정 시 <strong>요금 폭탄</strong> 맞을 수 있어요!<br>
             <strong>가능하면 카카오톡 또는 단체 채팅방을 이용해주세요 👇</strong>
           </div>
         </div>
       </div>
-
-      <!-- 카카오 단톡방 -->
       <a href="https://open.kakao.com/o/gRo1Rvli" target="_blank"
-        style="display:flex;align-items:center;gap:12px;background:#FEE500;border-radius:10px;padding:12px 16px;margin-bottom:8px;text-decoration:none"
-        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        style="display:flex;align-items:center;gap:12px;background:#FEE500;border-radius:10px;padding:12px 16px;margin-bottom:8px;text-decoration:none">
         <span style="font-size:24px">💬</span>
         <div>
           <div style="font-size:14px;font-weight:800;color:#3A1D1D">ONCHAIN 2140 홍콩 크루즈 단체 채팅방</div>
@@ -1308,11 +973,8 @@
         </div>
         <span style="margin-left:auto;font-size:18px;color:#3A1D1D">→</span>
       </a>
-
-      <!-- 텔레그램 방 -->
       <a href="https://t.me/+lZJxyopMildlODE1" target="_blank"
-        style="display:flex;align-items:center;gap:12px;background:#229ED9;border-radius:10px;padding:12px 16px;margin-bottom:16px;text-decoration:none"
-        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        style="display:flex;align-items:center;gap:12px;background:#229ED9;border-radius:10px;padding:12px 16px;margin-bottom:16px;text-decoration:none">
         <span style="font-size:24px">✈️</span>
         <div>
           <div style="font-size:14px;font-weight:800;color:#fff">ONCHAIN 2140 홍콩 크루즈 텔레그램</div>
@@ -1332,18 +994,20 @@
       <div class="emg-card"><div class="name">김재담</div><div class="nick">닉네임: 썬킴</div><div class="phone"><a href="tel:01082532411" onclick="return confirmCall('010-8253-2411')" style="color:var(--teal);text-decoration:none;font-weight:700">010-8253-2411 📞</a></div><div style="margin-top:8px"><a href="http://qr.kakao.com/talk/Lbyo8NGse2mSszS4gwX7GIzCKTI-" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:#FEE500;border-radius:6px;padding:5px 10px;text-decoration:none;font-size:12px;font-weight:700;color:#3A1D1D">💬 카카오톡</a></div></div>
       <div class="emg-card"><div class="name">김도은</div><div class="nick">도은</div><div class="phone"><a href="tel:01099697457" onclick="return confirmCall('010-9969-7457')" style="color:var(--teal);text-decoration:none;font-weight:700">010-9969-7457 📞</a></div></div>
       <div class="emg-card"><div class="name">우종선</div><div class="nick">닉네임: JS우</div><div class="phone"><a href="tel:01063230952" onclick="return confirmCall('010-6323-0952')" style="color:var(--teal);text-decoration:none;font-weight:700">010-6323-0952 📞</a></div><div style="margin-top:8px"><a href="http://qr.kakao.com/talk/z3XPlL5imU4rN_zoke_wVA0c.2A-" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:#FEE500;border-radius:6px;padding:5px 10px;text-decoration:none;font-size:12px;font-weight:700;color:#3A1D1D">💬 카카오톡</a></div></div>
-      <div class="emg-card"><div class="name">현승희</div><div class="nick">승희</div><div class="phone"><a href="tel:01022010231" onclick="return confirmCall('010-2201-0231')" style="color:var(--teal);text-decoration:none;font-weight:700">010-2201-0231 📞</a></div></div>
       <div class="emg-card"><div class="name">황중일</div><div class="nick">중일</div><div class="phone"><a href="tel:01057588192" onclick="return confirmCall('010-5758-8192')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5758-8192 📞</a></div></div>
       <div class="emg-card"><div class="name">정금자</div><div class="nick">금자</div><div class="phone"><a href="tel:01053878192" onclick="return confirmCall('010-5387-8192')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5387-8192 📞</a></div></div>
       <div class="emg-card"><div class="name">김채은</div><div class="nick">채은</div><div class="phone"><a href="tel:01036061523" onclick="return confirmCall('010-3606-1523')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3606-1523 📞</a></div></div>
       <div class="emg-card"><div class="name">김무성</div><div class="nick">무성</div><div class="phone"><a href="tel:01020865435" onclick="return confirmCall('010-2086-5435')" style="color:var(--teal);text-decoration:none;font-weight:700">010-2086-5435 📞</a></div></div>
-      <div class="emg-card"><div class="name">최운화</div><div class="nick">운화</div><div class="phone"><a href="tel:01036159428" onclick="return confirmCall('010-3615-9428')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3615-9428 📞</a></div></div>
       <div class="emg-card"><div class="name">김인자</div><div class="nick">인자</div><div class="phone"><a href="tel:01047231982" onclick="return confirmCall('010-4723-1982')" style="color:var(--teal);text-decoration:none;font-weight:700">010-4723-1982 📞</a></div></div>
       <div class="emg-card"><div class="name">김명순</div><div class="nick">명순</div><div class="phone"><a href="tel:01029403558" onclick="return confirmCall('010-2940-3558')" style="color:var(--teal);text-decoration:none;font-weight:700">010-2940-3558 📞</a></div></div>
       <div class="emg-card"><div class="name">주재순</div><div class="nick">재순</div><div class="phone"><a href="tel:01041662747" onclick="return confirmCall('010-4166-2747')" style="color:var(--teal);text-decoration:none;font-weight:700">010-4166-2747 📞</a></div></div>
       <div class="emg-card"><div class="name">박평심</div><div class="nick">평심</div><div class="phone"><a href="tel:01049311866" onclick="return confirmCall('010-4931-1866')" style="color:var(--teal);text-decoration:none;font-weight:700">010-4931-1866 📞</a></div></div>
       <div class="emg-card"><div class="name">김수영</div><div class="nick">수영</div><div class="phone"><a href="tel:01036229644" onclick="return confirmCall('010-3622-9644')" style="color:var(--teal);text-decoration:none;font-weight:700">010-3622-9644 📞</a></div></div>
       <div class="emg-card"><div class="name">김경애</div><div class="nick">경애</div><div class="phone"><a href="tel:01050921407" onclick="return confirmCall('010-5092-1407')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5092-1407 📞</a></div></div>
+      <div class="emg-card"><div class="name">신경숙</div><div class="nick">경숙</div><div class="phone"><a href="tel:01077943045" onclick="return confirmCall('010-7794-3045')" style="color:var(--teal);text-decoration:none;font-weight:700">010-7794-3045 📞</a></div></div>
+      <div class="emg-card"><div class="name">박유리</div><div class="nick">유리</div><div class="phone"><a href="tel:01072422411" onclick="return confirmCall('010-7242-2411')" style="color:var(--teal);text-decoration:none;font-weight:700">010-7242-2411 📞</a></div></div>
+      <div class="emg-card"><div class="name">최진홍</div><div class="nick">마이콜</div><div class="phone"><a href="tel:01065843289" onclick="return confirmCall('010-6584-3289')" style="color:var(--teal);text-decoration:none;font-weight:700">010-6584-3289 📞</a></div></div>
+      <div class="emg-card"><div class="name">박혜덕</div><div class="nick">쏘냐</div><div class="phone"><a href="tel:01052493115" onclick="return confirmCall('010-5249-3115')" style="color:var(--teal);text-decoration:none;font-weight:700">010-5249-3115 📞</a></div></div>
     </div>
     <div style="padding:0 24px 20px;font-size:13px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:14px;margin-top:4px">
       🏥 홍콩 긴급: <strong>999</strong> · 한국 영사관: <strong>+852-2529-4141</strong> · 관광경찰: <strong>+852-2527-7177</strong>
@@ -1351,10 +1015,10 @@
   </div>
 </div>
 
-
-
   <!-- ══ JS 파일 (기능별 분리) ══ -->
   <script src="assets/js/data.js"></script>
+  <script src="assets/js/location.js"></script>
+  <script src="assets/js/cruiseMap.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/schedule.js"></script>
   <script src="assets/js/auth.js"></script>
@@ -1362,9 +1026,8 @@
   <script src="assets/js/community.js"></script>
   <script src="assets/js/app.js"></script>
 
-  <!-- ══ 초기화 (스플래시 → 로그인) ══ -->
+  <!-- ══ 초기화 ══ -->
   <script>
-    // 파티클 생성
     (function(){
       const container = document.getElementById('splashParticles');
       if(container){
@@ -1378,34 +1041,25 @@
       }
     })();
 
-    // 모든 JS 로드 후 스플래시 숨기기
     window.addEventListener('load', function(){
       setTimeout(function(){
         const splash = document.getElementById('splashScreen');
         if(splash) splash.classList.add('hidden');
 
-        // 다크모드 복원
         if(localStorage.getItem('darkMode')==='true'){
           document.body.classList.add('dark-mode');
         }
 
-        // 관광지 렌더
         if(typeof renderAttractions === 'function') renderAttractions();
-
-        // 오늘 일정 하이라이트
         if(typeof highlightTodaySchedule === 'function') highlightTodaySchedule();
-
-        // D-Day & 시계 시작
         if(typeof updateDDay === 'function'){ updateDDay(); setInterval(updateDDay, 1000); }
         if(typeof updateWorldClock === 'function'){ updateWorldClock(); setInterval(updateWorldClock, 1000); }
-
-        // 날씨
         if(typeof fetchHKWeather === 'function'){ fetchHKWeather(); setInterval(fetchHKWeather, 600000); }
-
-        // 커뮤니티 초기화
         if(typeof initCommunity === 'function') initCommunity();
 
-        // PWA 설치 배너
+        // GPS 위치 패널 초기화
+        if(typeof initLocationPanel === 'function') initLocationPanel();
+
         if(typeof showInstallBanner==='function' && !window.matchMedia('(display-mode:standalone)').matches && !window.navigator.standalone) setTimeout(showInstallBanner,3000);
 
       }, 2000);
