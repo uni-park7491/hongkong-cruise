@@ -1,218 +1,127 @@
-// =============================================
-// location.js - GPS 위치 공유 & 팀원 지도
-// =============================================
+// ─────────────────────────────────────────────
+// location.js — 실시간 위치 공유
+// 반드시 app.js 이후에 로드되어야 함
+// ─────────────────────────────────────────────
 
-const GMAPS_KEY = 'AIzaSyAR7MhosoVMQjTaDhxA9nq_Iz0OAqv7sCI';
-let _locMap       = null;
-let _locMarkers   = {};
-let _locInterval  = null;
-let _locSharing   = false;
-let _locUnsub     = null;
-let _gmapsLoaded  = false;
+let _locWatchId = null;
+let _locUnsubscribe = null;
 
-/* ── Google Maps 스크립트 동적 로드 ── */
-function _loadGMaps(cb) {
-  if (_gmapsLoaded || (window.google && window.google.maps)) {
-    _gmapsLoaded = true; cb(); return;
-  }
-  const s = document.createElement('script');
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&language=ko`;
-  s.async = true;
-  s.onload = () => { _gmapsLoaded = true; cb(); };
-  s.onerror = () => { console.warn('Google Maps 로드 실패 — 지도 기능 비활성화'); };
-  document.head.appendChild(s);
-}
-
-/* ── 위치 패널 초기화 (홈탭 진입 시 호출) ── */
+// 위치 공유 패널 초기화
 function initLocationPanel() {
-  const el = document.getElementById('locMapCanvas');
-  if (!el) return;
-  _loadGMaps(() => {
-    if (_locMap) return;
-    _locMap = new google.maps.Map(el, {
-      center: { lat: 22.3193, lng: 114.1694 },
-      zoom: 12,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-      zoomControl: true,
-      styles: [{ featureType:'poi', stylers:[{visibility:'off'}] }]
-    });
-    _subscribeLocations();
-  });
+  if (!window._db || !window._fs) {
+    window.addEventListener('fbready', initLocationPanel, { once: true });
+    return;
+  }
+  renderLocationCards();
+  subscribeLocations();
 }
 
-/* ── 내 위치 공유 토글 (버튼 onclick) ── */
+// 내 위치 공유 시작/중지
 function toggleMyLocation() {
-  if (!window._currentUser) {
-    alert('로그인 후 이용하세요.'); return;
+  const btn = document.getElementById('locToggleBtn');
+  if (_locWatchId !== null) {
+    navigator.geolocation.clearWatch(_locWatchId);
+    _locWatchId = null;
+    if (btn) { btn.textContent = '📍 위치 공유 시작'; btn.style.background = 'linear-gradient(135deg,#1e5fd4,#0e8a7c)'; }
+    updateLocationStatus('위치 공유 중지됨');
+    return;
   }
-  _locSharing ? _stopSharing() : _startSharing();
-}
-
-function _startSharing() {
   if (!navigator.geolocation) {
-    alert('이 브라우저는 위치 공유를 지원하지 않아요.'); return;
+    alert('이 기기에서 위치 서비스를 지원하지 않습니다.');
+    return;
   }
-  const opts = { enableHighAccuracy: true, timeout: 10000 };
-  navigator.geolocation.getCurrentPosition(pos => {
-    _saveLocation(pos.coords.latitude, pos.coords.longitude);
-    _locSharing = true;
-    _updateLocBtn();
-    _locInterval = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(
-        p => _saveLocation(p.coords.latitude, p.coords.longitude),
-        null, opts
-      );
-    }, 60000);
-  }, () => {
-    alert('위치 권한이 필요해요.\n브라우저 설정에서 위치 허용 후 다시 눌러주세요.');
-  }, opts);
+  if (btn) { btn.textContent = '⏹ 위치 공유 중지'; btn.style.background = 'linear-gradient(135deg,#dc2626,#b91c1c)'; }
+  updateLocationStatus('위치 확인 중...');
+
+  _locWatchId = navigator.geolocation.watchPosition(
+    function(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy);
+      saveMyLocation(lat, lng, acc);
+      updateLocationStatus('공유 중 · 정확도 ±' + acc + 'm');
+    },
+    function(err) {
+      const msgs = { 1: '위치 권한이 거부됐습니다. 설정에서 허용해주세요.', 2: '위치 신호를 찾을 수 없습니다.', 3: '위치 확인 시간 초과.' };
+      updateLocationStatus(msgs[err.code] || '위치 오류');
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+  );
 }
 
-function _stopSharing() {
-  if (_locInterval) { clearInterval(_locInterval); _locInterval = null; }
-  const u = window._currentUser;
-  if (u && window._db && window._fs) {
+// Firebase에 위치 저장
+async function saveMyLocation(lat, lng, acc) {
+  if (!appUser || !window._db || !window._fs) return;
+  try {
+    const fs = window._fs;
     const db = window._db;
-    const { doc, deleteDoc } = window._fs;
-    if (doc && deleteDoc) deleteDoc(doc(db, 'locations', u.name)).catch(() => {});
-  }
-  _locSharing = false;
-  _updateLocBtn();
+    await fs.setDoc(fs.doc(db, 'locations', appUser.nick), {
+      nick: appUser.nick,
+      name: appUser.name,
+      lat: lat,
+      lng: lng,
+      acc: acc,
+      ts: fs.serverTimestamp()
+    });
+  } catch (e) { console.warn('위치 저장 실패:', e); }
 }
 
-function _saveLocation(lat, lng) {
-  const u = window._currentUser;
-  if (!u) return;
-  const fs = window._fs;
-  const db = window._db || (fs && fs.db);
-  if (!fs || !db) return;
+// 실시간 위치 수신
+function subscribeLocations() {
+  if (!window._db || !window._fs) return;
+  if (_locUnsubscribe) _locUnsubscribe();
   try {
-    const { doc, setDoc, serverTimestamp } = fs;
-    if (doc && setDoc) {
-      setDoc(doc(db, 'locations', u.name), {
-        name: u.name, nick: u.nick || u.name,
-        lat, lng, updatedAt: serverTimestamp ? serverTimestamp() : new Date()
-      });
-    } else if (fs.addDoc && fs.collection) {
-      fs.addDoc(fs.collection(db, 'locations'), {
-        name: u.name, nick: u.nick || u.name, lat, lng
-      });
-    }
-  } catch(e) { console.warn('위치 저장 오류:', e); }
+    const fs = window._fs;
+    const db = window._db;
+    const colRef = fs.collection(db, 'locations');
+    _locUnsubscribe = fs.onSnapshot(colRef, function(snap) {
+      const locs = {};
+      snap.docs.forEach(function(d) { locs[d.id] = d.data(); });
+      renderLocationCards(locs);
+    });
+  } catch (e) { console.warn('위치 구독 실패:', e); }
 }
 
-/* ── Firestore 실시간 구독 ── */
-function _subscribeLocations() {
-  const fs = window._fs;
-  const db = window._db || (fs && fs.db);
-  if (!fs || !db) {
-    // Firebase 아직 미준비 → fbready 이후 재시도
-    window.addEventListener('fbready', _subscribeLocations, { once: true });
+// 위치 카드 렌더링
+function renderLocationCards(locs) {
+  const container = document.getElementById('locationCards');
+  if (!container) return;
+  if (!locs || Object.keys(locs).length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:13px;padding:20px 0">아직 위치를 공유한 멤버가 없어요</div>';
     return;
   }
-  const { collection, onSnapshot } = fs;
-  if (!collection || !onSnapshot) return;
-  if (_locUnsub) _locUnsub();
-  try {
-    _locUnsub = onSnapshot(collection(db, 'locations'), snap => {
-      const members = [];
-      snap.forEach(d => members.push(d.data()));
-      _renderMarkers(members);
-      _renderList(members);
-    }, () => {});
-  } catch(e) { console.warn('위치 구독 오류:', e); }
-}
-
-/* ── 지도 마커 렌더링 ── */
-function _renderMarkers(members) {
-  if (!_locMap || !window.google) return;
-  Object.values(_locMarkers).forEach(m => m.setMap(null));
-  _locMarkers = {};
-  if (members.length === 0) return;
-
-  const bounds = new google.maps.LatLngBounds();
-  members.forEach(m => {
-    const pos = { lat: m.lat, lng: m.lng };
-    bounds.extend(pos);
-    const marker = new google.maps.Marker({
-      position: pos, map: _locMap,
-      title: `${m.nick}(${m.name})`,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 20,
-        fillColor: m.name === window._currentUser?.name ? '#dc2626' : '#185FA5',
-        fillOpacity: 1,
-        strokeColor: '#fff',
-        strokeWeight: 2.5
-      },
-      label: { text: (m.nick||m.name).charAt(0), color:'#fff', fontSize:'12px', fontWeight:'500' }
-    });
-    const info = new google.maps.InfoWindow({
-      content: `<div style="font-size:13px;padding:4px 2px;font-family:sans-serif">
-        <b>${m.name}</b> <span style="color:#666">(${m.nick})</span>
-      </div>`
-    });
-    marker.addListener('click', () => info.open(_locMap, marker));
-    _locMarkers[m.name] = marker;
-  });
-
-  _locMap.fitBounds(bounds);
-  if (members.length === 1) _locMap.setZoom(14);
-}
-
-/* ── 위치 공유 멤버 목록 렌더링 ── */
-function _renderList(members) {
-  const el = document.getElementById('locMemberList');
-  if (!el) return;
-  const myName = window._currentUser?.name;
-  if (members.length === 0) {
-    el.innerHTML = `<div style="color:var(--color-text-secondary);font-size:13px;text-align:center;padding:10px 0">위치를 공유한 팀원이 아직 없어요</div>`;
-    return;
-  }
-  el.innerHTML = members.map(m => {
-    const isMe = m.name === myName;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
-      <div style="width:32px;height:32px;border-radius:50%;background:${isMe?'#dc2626':'#185FA5'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:500;flex-shrink:0">${(m.nick||m.name).charAt(0)}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${m.name} <span style="color:var(--color-text-secondary);font-weight:400">(${m.nick})</span>${isMe?'<span style="font-size:10px;background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:8px;margin-left:6px">나</span>':''}</div>
-        <div style="font-size:11px;color:var(--color-text-secondary)">위치 공유 중</div>
-      </div>
-      <button onclick="locFocus('${m.name}')" style="font-size:11px;padding:4px 10px;border-radius:10px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;color:var(--color-text-secondary);flex-shrink:0">보기</button>
-    </div>`;
+  const myNick = appUser ? appUser.nick : '';
+  container.innerHTML = Object.values(locs).sort(function(a, b) {
+    return a.nick === myNick ? -1 : b.nick === myNick ? 1 : 0;
+  }).map(function(loc) {
+    const isMe = loc.nick === myNick;
+    const timeStr = loc.ts ? (loc.ts.toDate ? loc.ts.toDate().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) : '') : '';
+    const mapUrl = 'https://maps.google.com/?q=' + loc.lat + ',' + loc.lng;
+    return '<div style="background:' + (isMe ? 'linear-gradient(135deg,#1e5fd4,#0e8a7c)' : '#f8faff') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
+      + '<div><div style="font-size:13px;font-weight:800;color:' + (isMe ? '#fff' : '#0f2044') + '">' + (isMe ? '📍 나 (' : '👤 ') + loc.nick + (isMe ? ')' : '') + '</div>'
+      + '<div style="font-size:11px;color:' + (isMe ? 'rgba(255,255,255,.7)' : '#64748b') + ';margin-top:2px">±' + (loc.acc || '?') + 'm · ' + timeStr + '</div></div>'
+      + '<a href="' + mapUrl + '" target="_blank" style="background:' + (isMe ? 'rgba(255,255,255,.2)' : '#1e5fd4') + ';color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none">지도보기</a>'
+      + '</div>';
   }).join('');
 }
 
-/* ── 특정 팀원 지도 포커스 ── */
-window.locFocus = function(name) {
-  const mk = _locMarkers[name];
-  if (mk && _locMap) {
-    _locMap.setCenter(mk.getPosition());
-    _locMap.setZoom(15);
-    google.maps.event.trigger(mk, 'click');
-  }
-};
-
-/* ── 버튼 상태 업데이트 ── */
-function _updateLocBtn() {
-  const btn = document.getElementById('locShareBtn');
-  if (!btn) return;
-  if (_locSharing) {
-    btn.textContent = '공유 중지';
-    btn.style.cssText = 'background:#dc2626;color:#fff;border-color:#dc2626;font-size:12px;padding:5px 12px;border-radius:12px;border:none;cursor:pointer';
-  } else {
-    btn.textContent = '내 위치 공유';
-    btn.style.cssText = 'background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;padding:5px 12px;border-radius:12px;border:0.5px solid var(--color-border-secondary);cursor:pointer';
-  }
+function updateLocationStatus(msg) {
+  const el = document.getElementById('locStatus');
+  if (el) el.textContent = msg;
 }
 
-/* ── 전역 노출 ── */
-window.initLocationPanel = initLocationPanel;
-window.toggleMyLocation  = toggleMyLocation;
-
-/* ── 언로드 시 위치 삭제 ── */
-window.addEventListener('beforeunload', () => {
-  if (_locSharing) _stopSharing();
-  if (_locUnsub)   _locUnsub();
-});
+// 위치 공유 탭 렌더링
+function renderLocationTab(content) {
+  if (!content) return;
+  content.innerHTML = '<div style="padding:0">'
+    + '<div style="padding:14px 16px;background:#fff;border-bottom:1px solid #e2e8f0">'
+    + '<div style="font-size:15px;font-weight:900;color:#0f2044;margin-bottom:2px">📍 실시간 위치 공유</div>'
+    + '<div style="font-size:11px;color:#64748b">멤버들의 현재 위치를 확인하세요</div>'
+    + '</div>'
+    + '<div style="padding:14px 16px">'
+    + '<button id="locToggleBtn" onclick="toggleMyLocation()" style="width:100%;background:linear-gradient(135deg,#1e5fd4,#0e8a7c);color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:10px">📍 위치 공유 시작</button>'
+    + '<div id="locStatus" style="text-align:center;font-size:11px;color:#94a3b8;margin-bottom:14px"></div>'
+    + '<div id="locationCards"></div>'
+    + '</div></div>';
+  initLocationPanel();
+}
